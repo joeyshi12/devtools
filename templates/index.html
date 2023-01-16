@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Webhook</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+<h2>Webhook Debugger</h2>
+<ul class="request-list">
+{% for request in history|reverse %}
+    <li class="request-info">
+        <table>
+            <tbody>
+                <tr>
+                    <td>{{request.method}}</td>
+                    <td>{{request.url}}</td>
+                </tr>
+                <tr>
+                    <td>Cookies</td>
+                    <td>
+                        <ul class="td-list">
+                        {% for key, value in request.cookies.items() %}
+                            <li>{{key}} = {{value}}</li>
+                        {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Request headers</td>
+                    <td>
+                        <ul class="td-list">
+                        {% for key, value in request.headers.items() %}
+                            <li>{{key}} = {{value}}</li>
+                        {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Request body</td>
+                    <td>{{request.body}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+{% endfor %}
+</ul>
+</body>
+</html>
