@@ -1,5 +1,7 @@
+import json
 from dataclasses import dataclass
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, render_template, request, make_response
+from jdtt.conversion import json_to_language_str, TargetLanguage
 
 @dataclass
 class RequestInfo:
@@ -19,8 +21,36 @@ request_history: list[RequestInfo] = []
 def index() -> Response:
     return Response(render_template("index.html", history=request_history))
 
-@app.route("/webhook", methods=HTTP_METHODS)
+@app.route("/jdtt")
+def jdtt() -> Response:
+    return Response(render_template("jdtt.html", history=request_history))
+
+@app.route("/webhook")
 def webhook() -> Response:
+    return Response(render_template("webhook.html", history=request_history))
+
+@app.errorhandler(404)
+def page_not_found(e: Exception) -> Response:
+    return Response(render_template("404.html"), 404)
+
+@app.route("/jdtt/transcompile", methods=["POST"])
+def transcompile_schema() -> Response:
+    try:
+        target_language = TargetLanguage[request.form["targetLanguage"]]
+        detect_dates = request.form["detectDates"] == "on"
+        schema = json.loads(request.form["schema_text"])
+        json_target_language_str = json_to_language_str(schema, target_language, "Root", detect_date=detect_dates)
+        response = Response(json_target_language_str, 200)
+        response.headers["Content-Type"] = "utf-8"
+        return response
+    except Exception as e:
+        app.logger.error(e)
+        response = Response("Invalid JSON Object", 500)
+        response.headers["Content-Type"] = "utf-8"
+        return response
+
+@app.route("/webhook/capture", methods=HTTP_METHODS)
+def capture_request() -> Response:
     info = RequestInfo(
         request.url,
         request.method,
@@ -28,7 +58,6 @@ def webhook() -> Response:
         request.data.decode(),
         dict(request.headers)
     )
-    print(info.headers)
     while len(request_history) >= HIST_SIZE:
         request_history.pop(0)
     request_history.append(info)
