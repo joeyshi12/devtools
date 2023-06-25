@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import dataclass
 from flask import Flask, Response, render_template, request, make_response
 from jdtt.conversion import json_to_language_str, TargetLanguage
@@ -15,7 +16,11 @@ HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'T
 HIST_SIZE = 16
 
 app = Flask(__name__)
+logger = logging.getLogger("waitress")
 request_history: list[RequestInfo] = []
+
+def create_app() -> Flask:
+    return app
 
 @app.route("/")
 def index() -> Response:
@@ -40,11 +45,12 @@ def transcompile_schema() -> Response:
         detect_dates = request.form["detectDates"] == "on"
         schema = json.loads(request.form["schema_text"])
         json_target_language_str = json_to_language_str(schema, target_language, "Root", detect_date=detect_dates)
+        logger.info("Transcompiled schema to %s", target_language.name)
         response = Response(json_target_language_str, 200)
         response.headers["Content-Type"] = "utf-8"
         return response
     except Exception as e:
-        app.logger.error(e)
+        logger.error(e)
         response = Response("Invalid JSON Object", 500)
         response.headers["Content-Type"] = "utf-8"
         return response
@@ -58,10 +64,16 @@ def capture_request() -> Response:
         request.data.decode(),
         dict(request.headers)
     )
+    logger.info("Captured request: [%s] %s", info.method, info.url)
     while len(request_history) >= HIST_SIZE:
         request_history.pop(0)
     request_history.append(info)
     return Response(status=204)
 
 if __name__ == "__main__":
-    app.run("0.0.0.0", 8080)
+    # Development server
+    #app.run("0.0.0.0", 8080)
+
+    # Production server
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
