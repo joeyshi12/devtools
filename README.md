@@ -1,8 +1,8 @@
-# webhook-debugger
+# devtools
 
-An implementation of a webhook debugging tool.
+Custom tools made for software development purposes
 
-## Usage
+## Tools
 
-- Send any request to `/webhook` to record a new entry on the server.
-- Server instance hosted <a href="http://webhook.joeyshi.xyz:1337">@webhook.joeyshi.xyz:1337</a>
+- Webhook: send any request to `/webhook/capture` to record the request data. View at `/webhook`
+- JSON schema transcompiler: web interface for https://github.com/joeyshi12/json-data-type-transcompiler
