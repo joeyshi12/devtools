@@ -3,3 +3,12 @@
     width: 8rem;
     text-align: left;
 }
+
+#editor {
+    border-style: solid;
+    border-width: 1px;
+    margin: 0.5rem 0;
+    width: 100%;
+    height: 20rem;
+    resize: both;
+}

@@ -16,7 +16,7 @@
         <p>Converts JSON Schema data types to other languages.</p>
         <p>This service is a wrapper for a Python library I made: <a href="https://github.com/joeyshi12/json-data-type-transcompiler">jdtt</a></p>
     </div>
-    <form action="/jdtt/transcompile" method="POST" target="_blank">
+    <form id="jdtt-form" action="/jdtt/transcompile" method="POST" target="_blank">
         <div>
             <label class="param-label">Target Language</label>
             <select name="targetLanguage">
@@ -31,9 +31,12 @@
         </div>
         <div>
             <h3>JSON Object</h3>
-            <textarea name="schema_text" rows="20" cols="80"></textarea>
+            <div id="editor"></div>
+            <input id="schema-input" type="hidden" name="schemaText" />
         </div>
         <input type="submit" value="Submit" />
     </form>
+    <script src="/static/js/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/jdtt.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>

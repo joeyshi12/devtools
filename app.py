@@ -43,7 +43,7 @@ def transcompile_schema() -> Response:
     try:
         target_language = TargetLanguage[request.form["targetLanguage"]]
         detect_dates = request.form["detectDates"] == "on"
-        schema = json.loads(request.form["schema_text"])
+        schema = json.loads(request.form["schemaText"])
         json_target_language_str = json_to_language_str(schema, target_language, "Root", detect_date=detect_dates)
         logger.info("Transcompiled schema to %s", target_language.name)
         response = Response(json_target_language_str, 200)
