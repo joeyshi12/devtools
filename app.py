@@ -1,7 +1,8 @@
 import json
 import logging
 from dataclasses import dataclass
-from flask import Flask, Response, render_template, request, make_response
+from flask import Flask, Response, render_template, request
+from waitress import serve
 from jdtt.conversion import json_to_language_str, TargetLanguage
 
 @dataclass
@@ -71,9 +72,4 @@ def capture_request() -> Response:
     return Response(status=204)
 
 if __name__ == "__main__":
-    # Development server
-    #app.run("0.0.0.0", 8080)
-
-    # Production server
-    from waitress import serve
     serve(app, host="0.0.0.0", port=8080)
