@@ -7,3 +7,7 @@ formElement.addEventListener("submit", (event) => {
     event.preventDefault();
     formElement.submit();
 });
+
+document.getElementById("fullscreen-button").addEventListener("click", () => {
+    editor.container.requestFullscreen();
+});
