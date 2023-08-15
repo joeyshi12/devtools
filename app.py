@@ -25,11 +25,11 @@ def create_app() -> Flask:
 
 @app.route("/")
 def index() -> Response:
-    return Response(render_template("index.html", history=request_history))
+    return Response(render_template("index.html"))
 
 @app.route("/jdtt")
 def jdtt() -> Response:
-    return Response(render_template("jdtt.html", history=request_history))
+    return Response(render_template("jdtt.html"))
 
 @app.route("/webhook")
 def webhook() -> Response:
