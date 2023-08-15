@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Database Visualization</title>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Visualizations for SQL databases." />
+    <meta name="author" content="Joey Shi" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/css/common.css"/>
+    <link rel="stylesheet" href="/static/css/dbvis.css"/>
+</head>
+<body>
+    <h1>MySQL Database Visualization</h1>
+    <p>
+        This tool allows you to visualize the tables in your MySQL database.
+        It will generate a graph of the tables and their relationships.
+        You can select on a table to see its columns and their types.
+    </p>
+    <section>
+        <h2>Connection</h2>
+        <form>
+            <div>
+                <label class="param-label">Host</label>
+                <input id="host" type="text" />
+            </div>
+            <div>
+                <label class="param-label">Port</label>
+                <input id="port" type="text" />
+            </div>
+            <div>
+                <label class="param-label">User</label>
+                <input id="user" type="text" />
+            </div>
+            <div>
+                <label class="param-label">Password</label>
+                <input id="password" type="password" />
+            </div>
+            <div>
+                <label class="param-label">Database</label>
+                <input id="database" type="text" />
+            </div>
+            <button type="button" id="dbvis-submit">Fetch Tables</button>
+        </form>
+    </section>
+    <script src="/static/js/dbvis.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>
