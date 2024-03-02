@@ -1,3 +1,4 @@
-Flask==2.2.2
+Flask==3.0.2
+flask_session==0.6.0
 jdtt==1.0.9
-waitress==2.1.2
+waitress==3.0.0
