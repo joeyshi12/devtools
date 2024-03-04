@@ -7,7 +7,7 @@ services:
     volumes:
       - ./:/dist
     environment:
-      - DB_HOST=localhost
+      - DB_HOST=0.0.0.0
       - DB_USER=devtools_user
       - DB_PASS=dt1234
       - DB_NAME=devtools
