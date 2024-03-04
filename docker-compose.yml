@@ -2,12 +2,10 @@ version: '3.3'
 services:
   devtools:
     image: python:3.10
-    command: sh -c "pip3 install -r requirements.txt && waitress-serve --port=8080 --call app:create_app"
+    command: sh -c "pip3 install -r requirements.txt && waitress-serve --port=2718 --call app:create_app"
     working_dir: /dist
     volumes:
       - ./:/dist
-    ports:
-      - "2718:8080"
     environment:
       - DB_HOST=localhost
       - DB_USER=devtools_user
