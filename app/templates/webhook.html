@@ -13,7 +13,7 @@
 <body>
 <h1>Webhook Debugger</h1>
 <a href="/">Return to homepage</a>
-<p>Send requests to <code>/webhook/{{webhook_session_id}}/capture</code> and this page will display the request body, headers, and cookies.</p>
+<p>Send requests to <code>/webhook/{{webhook_id}}/capture</code> and this page will display the request body, headers, and cookies.</p>
 <div>
     <button id="clear-captures-button">Clear captures</button>
 </div>
@@ -57,7 +57,7 @@
 </ul>
 <script>
     document.getElementById("clear-captures-button").onclick = () => {
-        fetch("/webhook/{{webhook_session_id}}", { method: "DELETE" }).then(() => {
+        fetch("/webhook/{{webhook_id}}", { method: "DELETE" }).then(() => {
             window.location.href = "/webhook"
         });
     };
