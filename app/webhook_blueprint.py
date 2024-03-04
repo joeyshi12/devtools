@@ -2,10 +2,10 @@ import datetime
 import logging
 import uuid
 from flask import Blueprint, render_template, Response, request, session, redirect
-import app.db as db
+import app.database_connection as db
 
-MAX_HIST_SIZE = 20
 WEBHOOK_SESSION_ID_KEY = "webhook_session_id"
+MAX_HIST_SIZE = 20
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
 webhook_blueprint = Blueprint("webhook", __name__)
