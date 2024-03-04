@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 import json
 from typing import Optional
@@ -33,6 +34,8 @@ def get_connection():
 def insert_request_capture(webhook_id: str, capture: RequestCapture):
     with get_connection() as connection:
         try:
+            if not is_valid_uuid(webhook_id):
+                raise Exception(f"Invalid webhook ID {webhook_id}")
             cursor = connection.cursor()
             query = (
                 "INSERT INTO request_capture "
@@ -99,3 +102,9 @@ def delete_request_captures(webhook_id: str, expire_date: Optional[str] = None):
         except Exception as e:
             logger.error("Failed to delete request capture for session %s", webhook_id, e)
             raise e
+
+
+def is_valid_uuid(uuid_str: str):
+    uuid_pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    match = re.match(uuid_pattern, uuid_str)
+    return bool(match)
