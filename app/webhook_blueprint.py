@@ -1,19 +1,11 @@
+import datetime
 import logging
 import uuid
-from dataclasses import dataclass
 from flask import Blueprint, render_template, Response, request, session, redirect
-import mariadb
+import app.db as db
 
-@dataclass
-class RequestInfo:
-    url: str
-    method: str
-    cookies: dict[str, str]
-    body: str
-    headers: dict[str, str]
-
-HIST_SIZE = 16
-WEBHOOK_ID_KEY = "webhook_id"
+MAX_HIST_SIZE = 20
+WEBHOOK_SESSION_ID_KEY = "webhook_session_id"
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
 webhook_blueprint = Blueprint("webhook", __name__)
@@ -22,34 +14,51 @@ logger = logging.getLogger("waitress")
 
 @webhook_blueprint.route("/")
 def index() -> Response:
-    if WEBHOOK_ID_KEY not in session:
-        session[WEBHOOK_ID_KEY] = uuid.uuid4()
+    if WEBHOOK_SESSION_ID_KEY not in session:
+        session[WEBHOOK_SESSION_ID_KEY] = str(uuid.uuid4())
+    return redirect(f"/webhook/{session[WEBHOOK_SESSION_ID_KEY]}")
 
 
-    return Response(render_template("webhook.html", session_id=session["session_id"], history=session.get(HIST_KEY, [])))
+@webhook_blueprint.route("/<webhook_session_id>")
+def capture_history(webhook_session_id: str) -> Response:
+    captures = db.get_request_captures(webhook_session_id)
+    params = {
+        "webhook_session_id": webhook_session_id,
+        "history": captures
+    }
+    return Response(render_template("webhook.html", **params))
 
 
-@webhook_blueprint.route("/<str:history_id>", methods=HTTP_METHODS)
-def capture_request(history_id: str) -> Response:
-    info = RequestInfo(
+@webhook_blueprint.route("/<webhook_session_id>/capture", methods=HTTP_METHODS)
+def capture_request(webhook_session_id: str) -> Response:
+    capture = db.RequestCapture(
         request.url,
         request.method,
         dict(request.cookies),
         request.data.decode(),
-        dict(request.headers)
+        dict(request.headers),
+        datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
     )
-    request_history = session.get(HIST_KEY, [])
-    request_history.append(info)
 
-    if len(request_history) > HIST_SIZE:
-        request_history = request_history[-HIST_SIZE:]
+    # delete captures if max history size is exceeded
+    captures = db.get_request_captures(webhook_session_id)
+    if len(captures) >= MAX_HIST_SIZE:
+        expire_date = captures[-MAX_HIST_SIZE].creation_date
+        db.delete_request_captures(webhook_session_id, expire_date)
 
-    session[HIST_KEY] = request_history
-    logger.info("Captured request (%d/%d): [%s] %s",
-                len(request_history), HIST_SIZE, info.method, info.url)
+    try:
+        db.insert_request_capture(webhook_session_id, capture)
+        logger.info("Captured request [method=%s] [url=%s]", capture.method, capture.url)
+        return Response(status=204)
+    except Exception:
+        return Response(
+            f"Failed to capture request for session {webhook_session_id}",
+            status=500,
+            mimetype="text/plain"
+        )
+
+
+@webhook_blueprint.route("/<webhook_session_id>", methods=["DELETE"])
+def delete_history(webhook_session_id: str) -> Response:
+    db.delete_request_captures(webhook_session_id)
     return Response(status=204)
-
-
-@webhook_blueprint.route("/history", methods=["DELETE"])
-def delete_history() -> Response:
-    return redirect("/")

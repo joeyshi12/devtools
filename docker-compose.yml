@@ -8,3 +8,9 @@ services:
       - ./:/dist
     ports:
       - "2718:8080"
+    environment:
+      - DB_HOST=localhost
+      - DB_USER=devtools_user
+      - DB_PASS=dt1234
+      - DB_NAME=devtools
+    network_mode: host
