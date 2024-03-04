@@ -12,7 +12,11 @@
 </head>
 <body>
 <h1>Webhook Debugger</h1>
-<p>Send requests to <code>/webhook/capture</code> and this page will display the request body, headers, and cookies.</p>
+<a href="/">Return to homepage</a>
+<p>Send requests to <code>/webhook/{{webhook_session_id}}/capture</code> and this page will display the request body, headers, and cookies.</p>
+<div>
+    <button id="clear-captures-button">Clear captures</button>
+</div>
 <ul class="request-list">
 {% for request in history|reverse %}
     <li class="request-info">
@@ -51,5 +55,12 @@
     </li>
 {% endfor %}
 </ul>
+<script>
+    document.getElementById("clear-captures-button").onclick = () => {
+        fetch("/webhook/{{webhook_session_id}}", { method: "DELETE" }).then(() => {
+            window.location.href = "/webhook"
+        });
+    };
+</script>
 </body>
 </html>
