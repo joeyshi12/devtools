@@ -31,6 +31,10 @@ def create_app() -> Flask:
     def index() -> Response:
         return Response(render_template("index.html"))
 
+    @app.route("/json-vis")
+    def json_vis() -> Response:
+        return Response(render_template("json_vis.html"))
+
     @app.errorhandler(404)
     def page_not_found(e: Exception) -> Response:
         return Response(render_template("404.html"), 404)
