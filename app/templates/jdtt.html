@@ -13,27 +13,37 @@
 <body>
     <h1>JSON Schema Transcompiler</h1>
     <a href="/">Return to homepage</a>
-    <div>
+    <div class="description">
         <p>Converts JSON Schema data types to other languages.</p>
         <p>This service is a wrapper for a Python library I made: <a href="https://github.com/joeyshi12/json-data-type-transcompiler">jdtt</a></p>
     </div>
     <form id="jdtt-form" action="/jdtt/transcompile" method="POST" target="_blank">
-        <div>
-            <label class="param-label">Target Language</label>
+        <div class="param-section">
+            <label class="param-label">Target language</label>
             <select name="targetLanguage">
                 <option value="python">Python</option>
-                <option value="scala">Scala</option>
                 <option value="typescript">TypeScript</option>
+                <option value="java">Java</option>
+                <option value="scala">Scala</option>
             </select>
         </div>
-        <div>
-            <label class="param-label">Detect Dates</label>
-            <input type="checkbox" name="detectDates" checked />
+        <div class="param-section">
+            <label class="param-label">Date format</label>
+            <select name="dateFormat">
+                <option value="None">None</option>
+                <option value="ISO">YYYY-MM-DD</option>
+                <option value="USA">MM/DD/YYYY</option>
+                <option value="EUR">DD.MM.YYYY</option>
+            </select>
+        </div>
+        <div class="param-section">
+            <label class="param-label">Sanitize symbols</label>
+            <input type="checkbox" name="sanitizeSymbols" checked />
         </div>
         <div>
-            <h3>JSON Object</h3>
+            <h3>JSON object</h3>
             <div id="editor"></div>
-            <input id="schema-input" type="hidden" name="schemaText" />
+            <input id="json-input" type="hidden" name="jsonString" />
         </div>
         <div class="form-footer">
             <input type="submit" value="Submit" />
