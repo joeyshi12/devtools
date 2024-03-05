@@ -7,12 +7,19 @@
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/css/common.css"/>
-    <link rel="stylesheet" href="/static/css/jdtt.css"/>
 </head>
 <body>
     <h1>JSON Visualizer</h1>
     <a href="/">Return to homepage</a>
-    <p>Bruhh</p>
-    <input type="file" id="json-file">
+    <div>
+        <label>JSON file</label>
+        <input id="file-input" type="file">
+    </div>
+    <div>
+        <label>Query</label>
+        <input id="query-input" type="text">
+    </div>
+
+    <script src="/static/js/json_vis.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
