@@ -45,6 +45,6 @@ def _get_date_pattern(date_format_option: str) -> Optional[str]:
         case "USA":
             return r"\d{2}-\d{2}-\d{4}"
         case "EUR":
-            return r"\d{2}.\d{2}.\d{4}"
+            return r"\d{2}\.\d{2}\.\d{4}"
         case _:
             return None
