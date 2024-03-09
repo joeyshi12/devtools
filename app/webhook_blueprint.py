@@ -21,7 +21,7 @@ def index() -> Response:
 
 
 @webhook_blueprint.route("/<webhook_id>")
-def capture_history(webhook_id: str) -> Response:
+def webhook_history(webhook_id: str) -> Response:
     captures = db.get_request_captures(webhook_id)
     params = {
         "webhook_id": webhook_id,
@@ -37,7 +37,7 @@ def capture_request(webhook_id: str) -> Response:
         request.method,
         request.data.decode(),
         dict(request.headers),
-        datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+        datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     )
 
     # delete captures if max history size is exceeded

@@ -34,7 +34,7 @@ def get_connection():
 
 def create_request_history():
     webhook_id = str(uuid.uuid4())
-    creation_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+    creation_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     with get_connection() as connection:
         cursor = connection.cursor()
         query = (
