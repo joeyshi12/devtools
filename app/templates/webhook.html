@@ -27,16 +27,6 @@
                     <td>{{request.url}}</td>
                 </tr>
                 <tr>
-                    <td>Cookies</td>
-                    <td>
-                        <ul class="td-list">
-                        {% for key, value in request.cookies.items() %}
-                            <li>{{key}} = {{value}}</li>
-                        {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
                     <td>Request headers</td>
                     <td>
                         <ul class="td-list">

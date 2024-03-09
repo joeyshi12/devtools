@@ -5,6 +5,7 @@ from flask import Flask, Response, render_template
 from flask_session import Session
 from app.webhook_blueprint import webhook_blueprint
 from app.jdtt_blueprint import jdtt_blueprint
+from app.exceptions import DevtoolsException
 
 
 def create_app() -> Flask:
@@ -26,6 +27,7 @@ def create_app() -> Flask:
             logging.StreamHandler()
         ]
     )
+    logger = logging.getLogger("waitress")
 
     @app.route("/")
     def index() -> Response:
@@ -34,5 +36,10 @@ def create_app() -> Flask:
     @app.errorhandler(404)
     def page_not_found(e: Exception) -> Response:
         return Response(render_template("404.html"), 404)
+
+    @app.errorhandler(Exception)
+    def internal_server_error(e: Exception) -> Response:
+        logger.error("Internal server error: %s", e)
+        return Response(render_template("500.html"), 500)
 
     return app
