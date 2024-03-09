@@ -3,6 +3,7 @@ import logging
 from typing import Optional
 from flask import Blueprint, Response, render_template, request
 from jdtt.transcompilation import transcompile
+from jdtt.exceptions import JDTTException
 
 jdtt_blueprint = Blueprint("jdtt", __name__)
 logger = logging.getLogger("waitress")
@@ -20,20 +21,21 @@ def transcompile_schema() -> Response:
         date_format = _get_date_pattern(request.form["dateFormat"])
         sanitize_symbols = "sanitizeSymbols" in request.form
         schema_json = json.loads(request.form["jsonString"])
-
-        if not isinstance(schema_json, dict):
-            message = "Not a JSON object literal"
-            logger.error(message)
-            return Response(message, 400, mimetype="utf-8")
-
         result = transcompile(schema_json, target_language, date_format, "Schema", sanitize_symbols)
         logger.info("Transcompiled JSON object to %s [date_format=%s] [sanitize_symbols=%s]",
                     target_language, date_format, sanitize_symbols)
         return Response(result, 200, mimetype="utf-8")
-
+    except json.decoder.JSONDecodeError as e:
+        message = f"Invalid JSON object: {e}"
+        logger.error(message)
+        return Response(message, 400, mimetype="utf-8")
+    except JDTTException as e:
+        message = f"jdtt: {e}"
+        logger.error(message)
+        return Response(message, 500, mimetype="utf-8")
     except Exception as e:
         message = "Failed to transcompile JSON object"
-        logger.error(message, e)
+        logger.error("%s: %s", message, e)
         return Response(message, 500, mimetype="utf-8")
 
 
