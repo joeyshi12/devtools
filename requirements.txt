@@ -1,5 +1,5 @@
 Flask==3.0.2
 flask_session==0.6.0
-jdtt==1.2.1
+jdtt==1.2.5
 waitress==3.0.0
 mariadb==1.1.10
