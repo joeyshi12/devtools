@@ -5,7 +5,6 @@ from flask import Flask, Response, render_template
 from flask_session import Session
 from app.webhook_blueprint import webhook_blueprint
 from app.jdtt_blueprint import jdtt_blueprint
-from app.exceptions import DevtoolsException
 
 
 def create_app() -> Flask:
