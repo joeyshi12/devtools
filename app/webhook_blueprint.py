@@ -3,6 +3,7 @@ import logging
 import uuid
 from flask import Blueprint, render_template, Response, request, session, redirect
 import app.database_connection as db
+from dataclasses import asdict
 
 WEBHOOK_SESSION_ID_KEY = "webhook_id"
 MAX_HIST_SIZE = 20
@@ -15,12 +16,12 @@ logger = logging.getLogger("waitress")
 @webhook_blueprint.route("/")
 def index() -> Response:
     if WEBHOOK_SESSION_ID_KEY not in session:
-        session[WEBHOOK_SESSION_ID_KEY] = str(uuid.uuid4())
+        session[WEBHOOK_SESSION_ID_KEY] = db.create_request_history()
     return redirect(f"/webhook/{session[WEBHOOK_SESSION_ID_KEY]}")
 
 
 @webhook_blueprint.route("/<webhook_id>")
-def capture_history(webhook_id: str) -> Response:
+def webhook_history(webhook_id: str) -> Response:
     captures = db.get_request_captures(webhook_id)
     params = {
         "webhook_id": webhook_id,
@@ -34,10 +35,9 @@ def capture_request(webhook_id: str) -> Response:
     capture = db.RequestCapture(
         request.url,
         request.method,
-        dict(request.cookies),
         request.data.decode(),
         dict(request.headers),
-        datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+        datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     )
 
     # delete captures if max history size is exceeded
@@ -49,13 +49,10 @@ def capture_request(webhook_id: str) -> Response:
     try:
         db.insert_request_capture(webhook_id, capture)
         logger.info("Captured request [method=%s] [url=%s]", capture.method, capture.url)
-        return Response(status=204)
-    except Exception:
-        return Response(
-            f"Failed to capture request for session {webhook_id}",
-            status=500,
-            mimetype="text/plain"
-        )
+        return asdict(capture)
+    except Exception as e:
+        logger.error("Failed to capture request: %s", e)
+        return Response("Failed to capture request", status=500, mimetype="text/plain")
 
 
 @webhook_blueprint.route("/<webhook_id>", methods=["DELETE"])

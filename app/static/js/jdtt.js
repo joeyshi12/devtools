@@ -3,8 +3,15 @@ editor.session.setMode("ace/mode/json");
 
 const formElement = document.getElementById("jdtt-form");
 formElement.addEventListener("submit", (event) => {
-    document.getElementById("json-input").value = editor.getValue();
     event.preventDefault();
+    let jsonInput;
+    try {
+        jsonInput = JSON.stringify(JSON.parse(editor.getValue()));
+    } catch (e) {
+        alert("Invalid JSON object entered");
+        return;
+    }
+    document.getElementById("json-input").value = jsonInput;
     formElement.submit();
 });
 

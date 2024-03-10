@@ -1,7 +1,9 @@
 import os
 import re
+import uuid
 import logging
 import json
+import datetime
 from typing import Optional
 from dataclasses import dataclass
 import mariadb
@@ -19,7 +21,6 @@ db_config = {
 class RequestCapture:
     url: str
     method: str
-    cookies: dict[str, str]
     body: str
     headers: dict[str, str]
     creation_date: str
@@ -31,54 +32,59 @@ def get_connection():
     return connection
 
 
+def create_request_history():
+    webhook_id = str(uuid.uuid4())
+    creation_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        query = (
+            "INSERT INTO webhook_history "
+            "VALUES (?, ?)"
+        )
+        cursor.execute(query, (webhook_id, creation_date))
+        connection.commit()
+
+    return webhook_id
+
+
 def insert_request_capture(webhook_id: str, capture: RequestCapture):
     with get_connection() as connection:
-        try:
-            if not is_valid_uuid(webhook_id):
-                raise Exception(f"Invalid webhook ID {webhook_id}")
-            cursor = connection.cursor()
-            query = (
-                "INSERT INTO request_capture "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)"
-            )
-            cookies_str = json.dumps(capture.cookies)
-            headers_str = json.dumps(capture.headers)
-            params = (
-                webhook_id,
-                capture.url,
-                capture.method,
-                capture.body,
-                cookies_str,
-                headers_str,
-                capture.creation_date
-            )
-            cursor.execute(query, params)
-            connection.commit()
-        except Exception as e:
-            logger.error("Failed to insert request capture for session %s", webhook_id, e)
-            raise e
+        if not is_valid_uuid(webhook_id):
+            raise Exception(f"Invalid webhook ID {webhook_id}")
+        cursor = connection.cursor()
+        query = (
+            "INSERT INTO request_capture "
+            "VALUES (?, ?, ?, ?, ?, ?)"
+        )
+        headers_str = json.dumps(capture.headers)
+        params = (
+            webhook_id,
+            capture.url,
+            capture.method,
+            capture.body,
+            headers_str,
+            capture.creation_date
+        )
+        cursor.execute(query, params)
+        connection.commit()
 
 
 def get_request_captures(webhook_id: str):
     captures = []
     with get_connection() as connection:
-        try:
-            cursor = connection.cursor()
-            query = (
-                "SELECT webhook_id, url, method, body, cookies, headers, creation_date "
-                "FROM request_capture "
-                "WHERE webhook_id = ? "
-                "ORDER BY creation_date"
-            )
-            cursor.execute(query, (webhook_id,))
-            for row in cursor.fetchall():
-                _, url, method, body, cookies_str, headers_str, creation_date = row
-                cookies = json.loads(cookies_str)
-                headers = json.loads(headers_str)
-                captures.append(RequestCapture(url, method, cookies, body, headers, creation_date))
-            logger.info("Read %d request captures for webhook session %s", len(captures), webhook_id)
-        except Exception as e:
-            logger.error("Failed to fetch request captures", e)
+        cursor = connection.cursor()
+        query = (
+            "SELECT webhook_id, url, method, body, headers, creation_date "
+            "FROM request_capture "
+            "WHERE webhook_id = ? "
+            "ORDER BY creation_date"
+        )
+        cursor.execute(query, (webhook_id,))
+        for row in cursor.fetchall():
+            _, url, method, body, headers_str, creation_date = row
+            headers = json.loads(headers_str)
+            captures.append(RequestCapture(url, method, body, headers, creation_date))
+        logger.info("Read %d request captures for webhook session %s", len(captures), webhook_id)
 
     return captures
 
@@ -86,22 +92,17 @@ def get_request_captures(webhook_id: str):
 def delete_request_captures(webhook_id: str, expire_date: Optional[str] = None):
     with get_connection() as connection:
         cursor = connection.cursor()
-        try:
-            query = (
-                "DELETE FROM request_capture "
-                "WHERE webhook_id = ?"
-            )
+        query = (
+            "DELETE FROM request_capture "
+            "WHERE webhook_id = ?"
+        )
+        if expire_date is None:
+            cursor.execute(query, (webhook_id,))
+        else:
+            query = query + " AND creation_date = ?"
+            cursor.execute(query, (webhook_id, expire_date))
 
-            if expire_date is None:
-                cursor.execute(query, (webhook_id,))
-            else:
-                query = query + " AND creation_date = ?"
-                cursor.execute(query, (webhook_id, expire_date))
-
-            connection.commit()
-        except Exception as e:
-            logger.error("Failed to delete request capture for session %s", webhook_id, e)
-            raise e
+        connection.commit()
 
 
 def is_valid_uuid(uuid_str: str):
