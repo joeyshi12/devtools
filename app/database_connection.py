@@ -32,6 +32,16 @@ def get_connection():
     return connection
 
 
+def webhook_history_exists(webhook_id: str):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        query = "SELECT EXISTS (SELECT id FROM webhook_history WHERE id = ?)"
+        cursor.execute(query, (webhook_id,))
+        return bool(cursor.fetchone()[0])
+
+    return False
+
+
 def create_request_history():
     webhook_id = str(uuid.uuid4())
     creation_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]

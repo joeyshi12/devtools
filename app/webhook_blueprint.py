@@ -15,7 +15,7 @@ logger = logging.getLogger("waitress")
 
 @webhook_blueprint.route("/")
 def index() -> Response:
-    if WEBHOOK_SESSION_ID_KEY not in session:
+    if WEBHOOK_SESSION_ID_KEY not in session or not db.webhook_history_exists(session[WEBHOOK_SESSION_ID_KEY]):
         session[WEBHOOK_SESSION_ID_KEY] = db.create_request_history()
     return redirect(f"/webhook/{session[WEBHOOK_SESSION_ID_KEY]}")
 
