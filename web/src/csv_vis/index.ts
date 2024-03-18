@@ -29,6 +29,7 @@ document.getElementById("plot-button").addEventListener("click", (event: any) =>
 
 function renderPlot(query: string) {
     const parser = new Parser(new Lexer(query));
+    // TODO: implement plots
     try {
         const result = parser.parse();
         console.log(result);
