@@ -13,6 +13,9 @@
         display: inline-block;
         width: 6rem;
     }
+    #plot-input {
+        width: 24rem;
+    }
 }
 
 table {

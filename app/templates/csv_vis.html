@@ -6,6 +6,7 @@
     <meta name="author" content="Joey Shi" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/css/common.css"/>
     <link rel="stylesheet" href="/static/css/csv_vis.css"/>
 </head>
 <body>
@@ -17,29 +18,12 @@
             <input id="csv-input" type="file">
         </div>
         <div class="form-param">
-            <label>Plot</label>
-            <select>
-                <option value="bar">Bar Graph</option>
-                <option value="line">Line Graph</option>
-                <option value="scatter">Scatter Plot</option>
-            </select>
+            <label>PQL query</label>
+            <input id="plot-input" type="text">
+            <button id="plot-button">Plot</button>
         </div>
-        <div class="form-param">
-            <label>X Column</label>
-            <select>
-                <option value="None">None</option>
-            </select>
-        </div>
-        <div class="form-param">
-            <label>Y Column</label>
-            <select>
-                <option value="None">None</option>
-            </select>
-        </div>
-        <button id="plot-button">Plot</button>
     </div>
     <div id="csv-table-container"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js" integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/static/js/csv_vis.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
