@@ -23,7 +23,34 @@
             <button id="plot-button">Plot</button>
         </div>
     </div>
-    <div id="csv-table-container"></div>
+    <div>
+        <div id="tab-buttons">
+            <button class="active">PQL</button>
+            <button>Table</button>
+            <button>Plot</button>
+        </div>
+        <div id="tabs">
+            <div class="tab active">
+                <div class="pql-container">
+                    <h2>PQL - Plot Query Language</h2>
+                    <p>PQL is an SQL-like DSL I made for generating plots. The basic syntax is as follows:</p>
+                    <pre>
+PLOT &lt;plot_type&gt;
+USING &lt;x_column&gt; [AS &lt;x_label&gt;], &lt;y_column&gt; [AS &lt;y_label&gt;]
+[WHERE &lt;condition&gt;]
+[GROUP BY &lt;column&gt;]
+                    </pre>
+                    <p>AST parser implementation can be found here: <a href="https://github.com/joeyshi12/pql-parser">https://github.com/joeyshi12/pql-parser</a>.</p>
+                </div>
+            </div>
+            <div class="tab">
+                <div id="table-container"></div>
+            </div>
+            <div class="tab">
+                <div id="plot-container"></div>
+            </div>
+        </div>
+    </div>
     <script src="/static/js/csv_vis.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>

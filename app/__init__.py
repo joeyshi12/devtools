@@ -32,7 +32,7 @@ def create_app() -> Flask:
     def index() -> Response:
         return Response(render_template("index.html"))
 
-    @app.route("/csv-vis")
+    @app.route("/csv_vis")
     def csv_vis() -> Response:
         return Response(render_template("csv_vis.html"))
 

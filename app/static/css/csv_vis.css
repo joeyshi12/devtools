@@ -1,21 +1,68 @@
-#csv-table-container {
-    overflow: scroll;
-    height: 600px;
-}
-
 .csv-vis-form {
     margin: 1rem 0;
 }
 
 .form-param {
     margin: 0.4rem 0;
-    label {
+
+    & > label {
         display: inline-block;
         width: 6rem;
     }
-    #plot-input {
+
+    & > #plot-input {
         width: 24rem;
     }
+}
+
+#tab-buttons {
+    background: #000000;
+
+    & > button {
+        padding: 10px 20px;
+        border: none;
+        color: #ffffff;
+        background: inherit;
+        text-align: center;
+    }
+
+    & > button:hover:not(.active) {
+        color: #000000;
+        background-color: #e9e9ed;
+    }
+
+    & > .active {
+        background-color: #4CAF50;
+    }
+}
+
+#tabs {
+    border: 1px solid;
+    height: 500px;
+    overflow: scroll;
+
+    & > .tab {
+        height: 100%;
+
+        .pql-container {
+            padding: 0 1rem;
+        }
+    }
+
+    & > .tab:not(.active) {
+        display: none;
+    }
+}
+
+#table-container {
+    width: 100%;
+}
+
+#plot-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 table {
