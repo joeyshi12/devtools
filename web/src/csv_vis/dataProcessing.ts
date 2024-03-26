@@ -21,7 +21,8 @@ export function processData(data: any[], syntaxTree: PQLSyntaxTree): [any[], any
         });
         x = [];
         y = [];
-        groups.forEach((rows: any[]) => {
+        groups.forEach((rows: any[], key) => {
+            console.log(key, rows);
             x.push(computeAggregateValue(rows, xAttr, syntaxTree.groupByColumn));
             y.push(computeAggregateValue(rows, yAttr, syntaxTree.groupByColumn));
         });
@@ -57,7 +58,7 @@ function computeAggregateValue(data: any[], attribute: UsingAttribute, groupByCo
 function columnSum(data: any[], column: string) {
     let sum = 0;
     data.forEach(row => {
-        sum += row[column];
+        sum += Number(row[column]);
     });
     return sum;
 }
