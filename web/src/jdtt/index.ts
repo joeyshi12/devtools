@@ -7,14 +7,15 @@ editor.session.setMode("ace/mode/json");
 const formElement = <HTMLFormElement>document.getElementById("jdtt-form");
 formElement.addEventListener("submit", (event) => {
     event.preventDefault();
-    let jsonInput: string;
+    let jsonInputString: string;
     try {
-        jsonInput = JSON.stringify(JSON.parse(editor.getValue()));
+        jsonInputString = JSON.stringify(JSON.parse(editor.getValue()));
     } catch (e) {
         alert("Invalid JSON object entered");
         return;
     }
-    (<HTMLInputElement>document.getElementById("json-input")).value = jsonInput;
+    const jsonInput = <HTMLInputElement>document.getElementById("json-input");
+    jsonInput.value = jsonInputString;
     formElement.submit();
 });
 

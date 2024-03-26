@@ -12,45 +12,27 @@
 <body>
     <h1>CSV Visualizer</h1>
     <a href="/">Return to homepage</a>
-    <div class="csv-vis-form">
-        <div class="form-param">
-            <label>CSV file</label>
-            <input id="csv-input" type="file">
-        </div>
-        <div class="form-param">
-            <label>PQL query</label>
-            <input id="plot-input" type="text">
-            <button id="plot-button">Plot</button>
-        </div>
-    </div>
-    <div>
-        <div id="tab-buttons">
-            <button class="active">PQL</button>
-            <button>Table</button>
-            <button>Plot</button>
-        </div>
-        <div id="tabs">
-            <div class="tab active">
-                <div class="pql-container">
-                    <h2>PQL - Plot Query Language</h2>
-                    <p>PQL is an SQL-like DSL I made for generating plots. The basic syntax is as follows:</p>
-                    <pre>
+    <div class="pql-description">
+        <p>This is a tool for creating plots from CSV data. Visualizations are generated using <a href="https://github.com/joeyshi12/pql-parser">PQL - Plot Query Language</a>: an SQL-like DSL I made for specifying plot configs.</p>
+        <p>The basic syntax is as follows:</p>
+        <pre>
 PLOT &lt;plot_type&gt;
 USING &lt;x_column&gt; [AS &lt;x_label&gt;], &lt;y_column&gt; [AS &lt;y_label&gt;]
 [WHERE &lt;condition&gt;]
 [GROUP BY &lt;column&gt;]
-                    </pre>
-                    <p>AST parser implementation can be found here: <a href="https://github.com/joeyshi12/pql-parser">https://github.com/joeyshi12/pql-parser</a>.</p>
-                </div>
-            </div>
-            <div class="tab">
-                <div id="table-container"></div>
-            </div>
-            <div class="tab">
-                <div id="plot-container"></div>
-            </div>
-        </div>
+        </pre>
     </div>
+    <div class="form-param">
+        <label>CSV file</label>
+        <input id="csv-input" type="file">
+    </div>
+    <div id="table-schema-container"></div>
+    <div class="form-param">
+        <label>PQL query</label>
+        <input id="query-input" type="text">
+        <button id="query-button">Plot</button>
+    </div>
+    <div id="plot-container"></div>
     <script src="/static/js/csv_vis.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
