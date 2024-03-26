@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
-import { Lexer, Parser } from 'pql-parser';
-import { PlotConfig } from './plotConfig';
-import { plotPoints } from './scatterPlot';
+import { Lexer, Parser, PQLSyntaxTree } from 'pql-parser';
+import { plotBars, plotLines, plotPoints, PlotConfig  } from './plots';
+import { processData } from './dataProcessing';
 
 let data: any[] = [];
 
@@ -12,34 +12,37 @@ function renderPlot(query: string) {
     }
     const parser = new Parser(new Lexer(query));
     try {
-        //const syntaxTree = parser.parse();
-        const x = data.map(d => d["baseSalary"]);
-        const y = data.map(d => d["baseSalary"]);
-        const config: PlotConfig = {
-            containerWidth: 500,
-            containerHeight: 500,
-            margin: { top: 20, right: 20, bottom: 20, left: 20 },
-            xLabel: "xStuff",
-            yLabel: "yStuff"
-        };
-        const svg = plotPoints(x, y, config);
-        setHeadElement(svg, "plot-container")
+        const syntaxTree = parser.parse();
+        const svg = createPlotElement(syntaxTree);
+        const container = document.getElementById("plot-container");
+        if (container.childNodes.length > 0) {
+            container.replaceChild(svg, container.childNodes[0]);
+        } else {
+            container.appendChild(svg);
+        }
     } catch (err) {
         alert(err);
     }
 }
 
-function renderSchemaTable(data: any[]) {
-    const tableElement = <HTMLTableElement>document.createElement("table");
-    setHeadElement(tableElement, "table-schema-container")
-}
-
-function setHeadElement(element: HTMLElement | SVGElement, parentId: string) {
-    const container = document.getElementById(parentId);
-    if (container.childNodes.length > 0) {
-        container.replaceChild(element, container.childNodes[0]);
-    } else {
-        container.appendChild(element);
+function createPlotElement(syntaxTree: PQLSyntaxTree): SVGElement {
+    const config: PlotConfig = {
+        containerWidth: 700,
+        containerHeight: 500,
+        margin: { top: 20, right: 20, bottom: 50, left: 100 },
+        xLabel: syntaxTree.usingAttributes[0].displayName ?? syntaxTree.usingAttributes[0].column,
+        yLabel: syntaxTree.usingAttributes[1].displayName ?? syntaxTree.usingAttributes[1].column
+    };
+    const [x, y] = processData(data, syntaxTree);
+    switch (syntaxTree.plotType) {
+        case "BAR":
+            return plotBars(x, y, config);
+        case "LINE":
+            return plotLines(x, y, config);
+        case "SCATTER":
+            return plotPoints(x, y, config);
+        default:
+            throw new Error(`Invalid plot type ${syntaxTree.plotType}`)
     }
 }
 
@@ -51,7 +54,6 @@ document.getElementById("csv-input").addEventListener("change", (event: any) => 
     const reader = new FileReader();
     reader.addEventListener("load", (event: any) => {
         data = d3.csvParse(event.target.result);
-        renderSchemaTable(data);
     });
     reader.readAsText(file,"UTF-8");
 });

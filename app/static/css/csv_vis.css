@@ -9,10 +9,10 @@
         display: inline-block;
         width: 6rem;
     }
+}
 
-    & > #plot-input {
-        width: 24rem;
-    }
+#query-input {
+    width: 24rem;
 }
 
 #plot-container {
@@ -20,4 +20,9 @@
     justify-content: center;
     align-items: center;
     height: 100%;
+    margin-top: 2rem;
+}
+
+.tick > line {
+    color: #ccc;
 }

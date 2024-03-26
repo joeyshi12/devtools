@@ -1,14 +1,14 @@
 import * as d3 from "d3";
 import { getShape, PlotConfig } from "./plotConfig";
+import { zip } from "../array";
 
-export function plotBars(x: number[], y: string[], config: PlotConfig) {
-
-}
-
-export function plotPoints(x: number[], y: number[], config: PlotConfig): SVGElement {
+export function plotLines(x: number[], y: number[], config: PlotConfig): SVGElement {
     if (x.length !== y.length) {
         throw new Error("Given number of x values is not equal to the number of y values");
     }
+
+    const data = zip(x, y);
+    data.sort((d1, d2) => d1[0] - d2[0]);
 
     const [width, height] = getShape(config);
     const svg = d3.create("svg")
@@ -17,15 +17,13 @@ export function plotPoints(x: number[], y: number[], config: PlotConfig): SVGEle
 
     if (config.xLabel) {
         svg.append("text")
-            .attr("x", 0)
-            .attr("y", 5)
+            .attr("transform", `translate(${config.containerWidth / 2}, ${config.containerHeight - 10})`)
             .text(config.xLabel);
     }
 
     if (config.yLabel) {
         svg.append("text")
-            .attr("x", 0)
-            .attr("y", 20)
+            .attr("transform", `translate(${config.margin.left - 40}, ${config.containerHeight / 2}) rotate(-90)`)
             .text(config.yLabel);
     }
 
@@ -33,14 +31,24 @@ export function plotPoints(x: number[], y: number[], config: PlotConfig): SVGEle
         .attr("transform", `translate(${config.margin.left},${config.margin.top})`);
 
     const xScale = d3.scaleLinear()
-        .domain([d3.min(x), d3.max(x)])
+        .domain(d3.extent(data, d => d[0]))
         .range([0, width]);
 
     const yScale = d3.scaleLinear()
-        .domain([d3.min(y), d3.max(y)])
+        .domain(d3.extent(data, d => d[1]))
         .range([height, 0]);
 
-    const data = zip(x, y);
+    const line: d3.Line<any> = d3.line()
+        .x(d => xScale(d[0]))
+        .y(d => yScale(d[1]));
+
+    plotArea.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", line);
+
     plotArea.selectAll("circle")
         .data(data)
         .enter()
@@ -58,11 +66,4 @@ export function plotPoints(x: number[], y: number[], config: PlotConfig): SVGEle
         .call(d3.axisLeft(yScale));
 
     return svg.node();
-}
-
-function zip(arr1: any[], arr2: any[]) {
-    if (arr1.length !== arr2.length) {
-        throw new Error("Cannot zip arrays of different lengths");
-    }
-    return arr1.map((value, i) => [value, arr2[i]]);
 }
