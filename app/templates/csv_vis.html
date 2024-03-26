@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CSV Visualizer</title>
+    <meta charset="UTF-8" />
+    <meta name="author" content="Joey Shi" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/css/common.css"/>
+    <link rel="stylesheet" href="/static/css/csv_vis.css"/>
+</head>
+<body>
+    <h1>CSV Visualizer</h1>
+    <a href="/">Return to homepage</a>
+    <div class="pql-description">
+        <p>This is a tool for creating plots from CSV data. Visualizations are generated using <a href="https://github.com/joeyshi12/pql-parser">PQL - Plot Query Language</a>.</p>
+        <p>The basic syntax is as follows:</p>
+        <pre>
+PLOT &lt;plot_type&gt;
+USING &lt;x_column&gt; [AS &lt;x_label&gt;], &lt;y_column&gt; [AS &lt;y_label&gt;]
+[WHERE &lt;condition&gt;]
+[GROUP BY &lt;column&gt;]
+        </pre>
+    </div>
+    <div class="form-param">
+        <label>CSV file</label>
+        <input id="csv-input" type="file" autocomplete="off">
+    </div>
+    <div id="table-schema-container"></div>
+    <div class="form-param">
+        <label>PQL query</label>
+        <input id="query-input" type="text">
+        <button id="query-button">Plot</button>
+    </div>
+    <div id="plot-container"></div>
+    <script src="/static/js/csv_vis.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>

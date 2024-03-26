@@ -32,6 +32,10 @@ def create_app() -> Flask:
     def index() -> Response:
         return Response(render_template("index.html"))
 
+    @app.route("/csv_vis")
+    def csv_vis() -> Response:
+        return Response(render_template("csv_vis.html"))
+
     @app.errorhandler(404)
     def page_not_found(e: Exception) -> Response:
         return Response(render_template("404.html"), 404)
