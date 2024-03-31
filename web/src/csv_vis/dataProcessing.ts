@@ -1,9 +1,31 @@
 import { PQLSyntaxTree, UsingAttribute } from "pql-parser";
 
-export function processData(data: any[], syntaxTree: PQLSyntaxTree): [any[], any[]] {
+export interface CsvRow {
+    [key: string]: string;
+}
+
+export interface Point {
+    x: any;
+    y: any;
+}
+
+export function processData(data: CsvRow[], syntaxTree: PQLSyntaxTree): Point[] {
     if (syntaxTree.usingAttributes.length !== 2) {
         throw new Error(`Invalid number of attributes ${syntaxTree.usingAttributes.length}`);
     }
+
+    // Validate columns in syntax tree
+    const columns = Object.keys(data[0]);
+    syntaxTree.usingAttributes.forEach(attribute => {
+        if (attribute.column && !columns.includes(attribute.column)) {
+            throw new Error(`Invalid column in using attributes [${attribute.column}]\nAvailable columns:\n${columns.join("\n")}`);
+        }
+    });
+    if (syntaxTree.groupByColumn && !columns.includes(syntaxTree.groupByColumn)) {
+        throw new Error(`Invalid group by column [${syntaxTree.groupByColumn}]\nAvailable columns:\n${columns.join("\n")}`)
+    }
+
+    // Generate attribute data
     const [xAttr, yAttr] = syntaxTree.usingAttributes;
     let x: any[];
     let y: any[];
@@ -13,10 +35,11 @@ export function processData(data: any[], syntaxTree: PQLSyntaxTree): [any[], any
     } else {
         const groups: Map<string, any[]> = new Map();
         data.forEach(row => {
-            if (groups.has(row[syntaxTree.groupByColumn])) {
-                groups.get(row[syntaxTree.groupByColumn]).push(row);
+            const groupByValue = row[syntaxTree.groupByColumn];
+            if (groups.has(groupByValue)) {
+                groups.get(groupByValue).push(row);
             } else {
-                groups.set(row[syntaxTree.groupByColumn], [row]);
+                groups.set(groupByValue, [row]);
             }
         });
         x = [];
@@ -27,19 +50,22 @@ export function processData(data: any[], syntaxTree: PQLSyntaxTree): [any[], any
             y.push(computeAggregateValue(rows, yAttr, syntaxTree.groupByColumn));
         });
     }
+
+    // Cast attribute data based on plot type
     switch (syntaxTree.plotType) {
         case "BAR":
-            return [x.map(val => Number(val)), y];
+            return x.map((val, i) => ({ x: Number(val), y: y[i] }))
+                .filter(point => !isNaN(point.x));
         case "LINE":
-            return [x.map(val => Number(val)), y.map(val => Number(val))];
         case "SCATTER":
-            return [x.map(val => Number(val)), y.map(val => Number(val))];
+            return x.map((val, i) => ({ x: Number(val), y: Number(y[i]) }))
+                .filter(point => !isNaN(point.x) && !isNaN(point.y));
         default:
-            throw new Error(`Invalid plot type ${syntaxTree.plotType}`)
+            throw new Error(`Invalid plot type ${syntaxTree.plotType}`);
     }
 }
 
-function computeAggregateValue(data: any[], attribute: UsingAttribute, groupByColumn: string) {
+function computeAggregateValue(data: CsvRow[], attribute: UsingAttribute, groupByColumn: string) {
     switch (attribute.aggregationFunction) {
         case "AVG":
             return columnSum(data, attribute.column) / data.length;
@@ -55,10 +81,13 @@ function computeAggregateValue(data: any[], attribute: UsingAttribute, groupByCo
     throw new Error(`Invalid attribute ${attribute}`)
 }
 
-function columnSum(data: any[], column: string) {
+function columnSum(data: CsvRow[], column: string) {
     let sum = 0;
     data.forEach(row => {
-        sum += Number(row[column]);
+        const numValue = Number(row[column]);
+        if (!isNaN(numValue)) {
+            sum += numValue
+        }
     });
     return sum;
 }

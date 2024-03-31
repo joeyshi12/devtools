@@ -1,16 +1,11 @@
 import * as d3 from "d3";
 import { getShape, PlotConfig } from "./plotConfig";
-import { zip } from "../array";
+import { Point } from "../dataProcessing";
 
-export function plotBars(x: number[], y: string[], config: PlotConfig): SVGElement {
-    if (x.length !== y.length) {
-        throw new Error("Given number of x values is not equal to the number of y values");
-    }
-
-    let data = zip(x, y);
-    data.sort((d1, d2) => d2[0] - d1[0])
-    data = data.slice(0, 20)
-    data.reverse();
+export function plotBars(points: Point[], config: PlotConfig): SVGElement {
+    points.sort((p1, p2) => p2.x - p1.x)
+    points = points.slice(0, 20)
+    points.reverse();
 
     const [width, height] = getShape(config);
     const svg = d3.create("svg")
@@ -26,12 +21,13 @@ export function plotBars(x: number[], y: string[], config: PlotConfig): SVGEleme
     const plotArea = svg.append("g")
         .attr("transform", `translate(${config.margin.left},${config.margin.top})`);
 
+    const [xMin, xMax] = d3.extent(points, p => p.x);
     const xScale = d3.scaleLinear()
-        .domain([Math.min(0, d3.min(data, d => d[0])), d3.max(data, d => d[0])])
+        .domain([Math.min(0, xMin), xMax])
         .range([0, width]);
 
     const yScale = d3.scaleBand()
-        .domain(data.map(d => d[1]))
+        .domain(points.map(p => p.y))
         .range([height, 0])
         .paddingInner(0.1)
         .paddingOuter(0);
@@ -43,10 +39,10 @@ export function plotBars(x: number[], y: string[], config: PlotConfig): SVGEleme
 
     const yAxis = d3.axisLeft(yScale)
         .tickFormat(label => {
-            if (label.length <= 10) {
+            if (label.length <= 16) {
                 return label;
             } else {
-                return label.substring(0, 10) + "…";
+                return label.substring(0, 16) + "…";
             }
         });
 
@@ -58,13 +54,13 @@ export function plotBars(x: number[], y: string[], config: PlotConfig): SVGEleme
         .call(yAxis);
 
     plotArea.selectAll("rect")
-        .data(data)
+        .data(points)
         .enter()
         .append("rect")
         .attr("fill", "steelblue")
         .attr("x", 0)
-        .attr("y", d => yScale(d[1]))
-        .attr("width", d => xScale(d[0]))
+        .attr("y", p => yScale(p.y))
+        .attr("width", p => xScale(p.x))
         .attr("height", yScale.bandwidth())
 
     return svg.node();

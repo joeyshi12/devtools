@@ -16,10 +16,10 @@
         <p>This is a tool for creating plots from CSV data. Visualizations are generated using <a href="https://github.com/joeyshi12/pql-parser">PQL - Plot Query Language</a>.</p>
         <p>The basic syntax is as follows:</p>
         <pre>
-PLOT &lt;plot_type&gt;
+PLOT (BAR | LINE | SCATTER)
 USING &lt;x_column&gt; [AS &lt;x_label&gt;], &lt;y_column&gt; [AS &lt;y_label&gt;]
-[WHERE &lt;condition&gt;]
-[GROUP BY &lt;column&gt;]
+[WHERE &lt;column&gt; &lt;comparison_operator&gt; &lt;value&gt;]
+[GROUPBY &lt;column&gt;]
         </pre>
     </div>
     <div class="form-param">

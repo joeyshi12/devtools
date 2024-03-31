@@ -1,12 +1,8 @@
 import * as d3 from "d3";
 import { getShape, PlotConfig } from "./plotConfig";
-import { zip } from "../array";
+import { Point } from "../dataProcessing";
 
-export function plotPoints(x: number[], y: number[], config: PlotConfig): SVGElement {
-    if (x.length !== y.length) {
-        throw new Error("Given number of x values is not equal to the number of y values");
-    }
-
+export function plotPoints(points: Point[], config: PlotConfig): SVGElement {
     const [width, height] = getShape(config);
     const svg = d3.create("svg")
         .attr("width", config.containerWidth)
@@ -28,20 +24,19 @@ export function plotPoints(x: number[], y: number[], config: PlotConfig): SVGEle
         .attr("transform", `translate(${config.margin.left},${config.margin.top})`);
 
     const xScale = d3.scaleLinear()
-        .domain(d3.extent(x))
+        .domain(d3.extent(points, p => p.x))
         .range([0, width]);
 
     const yScale = d3.scaleLinear()
-        .domain(d3.extent(y))
+        .domain(d3.extent(points, p => p.y))
         .range([height, 0]);
 
-    const data = zip(x, y);
     plotArea.selectAll("circle")
-        .data(data)
+        .data(points)
         .enter()
         .append("circle")
-        .attr("cx", d => xScale(d[0]))
-        .attr("cy", d => yScale(d[1]))
+        .attr("cx", p => xScale(p.x))
+        .attr("cy", p => yScale(p.y))
         .attr("r", 5)
         .attr("fill", "steelblue");
 

@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { Lexer, Parser, PQLSyntaxTree } from 'pql-parser';
+import { Lexer, Parser, PQLSyntaxTree, UsingAttribute } from 'pql-parser';
 import { plotBars, plotLines, plotPoints, PlotConfig  } from './plots';
 import { processData } from './dataProcessing';
 
@@ -29,20 +29,37 @@ function createPlotElement(syntaxTree: PQLSyntaxTree): SVGElement {
     const config: PlotConfig = {
         containerWidth: 700,
         containerHeight: 500,
-        margin: { top: 20, right: 20, bottom: 50, left: 100 },
-        xLabel: syntaxTree.usingAttributes[0].displayName ?? syntaxTree.usingAttributes[0].column,
-        yLabel: syntaxTree.usingAttributes[1].displayName ?? syntaxTree.usingAttributes[1].column
+        margin: { top: 20, right: 20, bottom: 50, left: 120 },
+        xLabel: getAttributeName(syntaxTree.usingAttributes[0]),
+        yLabel: getAttributeName(syntaxTree.usingAttributes[1])
     };
-    const [x, y] = processData(data, syntaxTree);
+    const points = processData(data, syntaxTree);
+    if (points.length === 0) {
+        throw new Error(
+            `Failed to process data points for ${syntaxTree.plotType} plot\n` +
+                "BAR(x: number, y: string), LINE(x: number, y: number), SCATTER(x: number, y: number)"
+        );
+    }
+    console.log(points);
     switch (syntaxTree.plotType) {
         case "BAR":
-            return plotBars(x, y, config);
+            return plotBars(points, config);
         case "LINE":
-            return plotLines(x, y, config);
+            return plotLines(points, config);
         case "SCATTER":
-            return plotPoints(x, y, config);
+            return plotPoints(points, config);
         default:
             throw new Error(`Invalid plot type ${syntaxTree.plotType}`)
+    }
+}
+
+function getAttributeName(attribute: UsingAttribute): string {
+    if (attribute.displayName) {
+        return attribute.displayName;
+    } else if (attribute.aggregationFunction) {
+        return `${attribute.aggregationFunction}(${attribute.column ?? ""})`;
+    } else {
+        return attribute.column;
     }
 }
 

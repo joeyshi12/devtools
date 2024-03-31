@@ -1,14 +1,9 @@
 import * as d3 from "d3";
 import { getShape, PlotConfig } from "./plotConfig";
-import { zip } from "../array";
+import { Point } from "../dataProcessing";
 
-export function plotLines(x: number[], y: number[], config: PlotConfig): SVGElement {
-    if (x.length !== y.length) {
-        throw new Error("Given number of x values is not equal to the number of y values");
-    }
-
-    const data = zip(x, y);
-    data.sort((d1, d2) => d1[0] - d2[0]);
+export function plotLines(points: Point[], config: PlotConfig): SVGElement {
+    points.sort((p1, p2) => p1.x - p2.x);
 
     const [width, height] = getShape(config);
     const svg = d3.create("svg")
@@ -31,32 +26,23 @@ export function plotLines(x: number[], y: number[], config: PlotConfig): SVGElem
         .attr("transform", `translate(${config.margin.left},${config.margin.top})`);
 
     const xScale = d3.scaleLinear()
-        .domain(d3.extent(data, d => d[0]))
+        .domain(d3.extent(points, p => p.x))
         .range([0, width]);
 
     const yScale = d3.scaleLinear()
-        .domain(d3.extent(data, d => d[1]))
+        .domain(d3.extent(points, p => p.y))
         .range([height, 0]);
 
-    const line: d3.Line<any> = d3.line()
-        .x(d => xScale(d[0]))
-        .y(d => yScale(d[1]));
+    const line: d3.Line<Point> = d3.line<Point>()
+        .x(p => xScale(p.x))
+        .y(p => yScale(p.y));
 
     plotArea.append("path")
-        .datum(data)
+        .datum(points)
         .attr("fill", "none")
         .attr("stroke", "steelblue")
         .attr("stroke-width", 1.5)
         .attr("d", line);
-
-    plotArea.selectAll("circle")
-        .data(data)
-        .enter()
-        .append("circle")
-        .attr("cx", d => xScale(d[0]))
-        .attr("cy", d => yScale(d[1]))
-        .attr("r", 5)
-        .attr("fill", "steelblue");
 
     plotArea.append("g")
         .attr("transform", `translate(0,${height})`)
