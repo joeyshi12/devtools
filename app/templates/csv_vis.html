@@ -13,14 +13,7 @@
     <h1>CSV Visualizer</h1>
     <a href="/">Return to homepage</a>
     <div class="pql-description">
-        <p>This is a tool for creating plots from CSV data. Visualizations are generated using <a href="https://github.com/joeyshi12/pql-parser">PQL - Plot Query Language</a>.</p>
-        <p>The basic syntax is as follows:</p>
-        <pre>
-PLOT (BAR | LINE | SCATTER)
-USING &lt;x_column&gt; [AS &lt;x_label&gt;], &lt;y_column&gt; [AS &lt;y_label&gt;]
-[WHERE &lt;column&gt; &lt;comparison_operator&gt; &lt;value&gt;]
-[GROUPBY &lt;column&gt;]
-        </pre>
+        <p>A tool for generating plots from CSV data. Plotting is done by writing a query in a DSL I wrote: <a href="https://github.com/joeyshi12/pql-parser">Plot Query Language</a>.</p>
     </div>
     <div class="form-param">
         <label>CSV file</label>
