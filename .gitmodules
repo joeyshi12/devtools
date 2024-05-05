@@ -1,3 +1,3 @@
 [submodule "web/lib/pql-parser"]
-	path = web/lib/pql-parser
-	url = git@github.com:joeyshi12/pql-parser.git
+    path = web/lib/pql-parser
+    url = git@github.com:joeyshi12/pql-parser.git
