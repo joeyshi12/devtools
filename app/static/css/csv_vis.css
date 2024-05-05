@@ -2,6 +2,10 @@
     margin-bottom: 1rem;
 }
 
+.pql-form {
+    margin-bottom: 1rem;
+}
+
 .form-param {
     margin: 0.4rem 0;
 
@@ -12,17 +16,19 @@
 }
 
 #query-input {
-    width: 24rem;
+    width: 26rem;
 }
 
 #plot-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
-    margin-top: 2rem;
+    margin: 1rem 0;
 }
 
-.tick > line {
-    color: #ccc;
+.card {
+    background: #f6f6f6;
+    padding: 1rem;
+    border: solid 1px #dfe0e0;
+    border-radius: .75rem;
 }

@@ -13,18 +13,21 @@
     <h1>CSV Visualizer</h1>
     <a href="/">Return to homepage</a>
     <div class="pql-description">
-        <p>A tool for generating plots from CSV data. Plotting is done by writing a query in a DSL I wrote: <a href="https://github.com/joeyshi12/pql-parser">Plot Query Language</a>.</p>
+        <p>A tool for generating plots from CSV data. Plotting is done by writing a query in a DSL I made: <a href="https://github.com/joeyshi12/pql-parser">Plot Query Language</a>.</p>
     </div>
-    <div class="form-param">
-        <label>CSV file</label>
-        <input id="csv-input" type="file" autocomplete="off">
+    <div class="pql-form">
+        <div class="form-param">
+            <label>CSV file</label>
+            <input id="csv-input" type="file" autocomplete="off">
+        </div>
+        <div class="form-param">
+            <label>PQL query</label>
+            <input id="query-input" type="text">
+            <button id="query-button">Plot</button>
+            <button id="save-button" disabled autocomplete="off">Save</button>
+        </div>
     </div>
-    <div id="table-schema-container"></div>
-    <div class="form-param">
-        <label>PQL query</label>
-        <input id="query-input" type="text">
-        <button id="query-button">Plot</button>
-    </div>
+    <div id="file-preview"></div>
     <div id="plot-container"></div>
     <script src="/static/js/csv_vis.js" type="text/javascript" charset="utf-8"></script>
 </body>
