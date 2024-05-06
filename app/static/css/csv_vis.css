@@ -2,13 +2,8 @@
     margin-bottom: 1rem;
 }
 
-.pql-form {
-    margin-bottom: 1rem;
-}
-
 .form-param {
-    margin: 0.4rem 0;
-
+    margin: 0.5rem 0;
     & > label {
         display: inline-block;
         width: 6rem;
