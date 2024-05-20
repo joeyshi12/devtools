@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS request_capture;
 
 CREATE TABLE webhook_history
 (
-	id CHAR(36) PRIMARY KEY,
-	creation_date DATETIME
+    id CHAR(36) PRIMARY KEY,
+    creation_date DATETIME
 );
 
 CREATE TABLE request_capture
