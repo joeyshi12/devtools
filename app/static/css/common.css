@@ -36,6 +36,12 @@ ul.breadcrumbs {
                 text-decoration: underline;
             }
         }
+        /* Logo */
+        & img {
+            width: 40px;
+            vertical-align: middle;
+            padding-right: 0.8rem;
+        }
     }
 }
 
