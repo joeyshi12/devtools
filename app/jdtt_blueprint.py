@@ -11,7 +11,7 @@ logger = logging.getLogger("waitress")
 
 @jdtt_blueprint.route("/")
 def index() -> Response:
-    return render_template("jdtt.html", title="JSON Schema Transcompiler")
+    return render_template("jdtt.html", title="JSON Data Type Transcompiler")
 
 
 @jdtt_blueprint.route("/transcompile", methods=["POST"])
