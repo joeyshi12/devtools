@@ -1,18 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Page Not Found | Devtools</title>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Handy tools for software development." />
-    <meta name="author" content="Joey Shi" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-</head>
-<body>
-    <h1>404 Not Found</h1>
-    <a href="/">Return to homepage</a>
-    <div>
-        <img src="https://media.giphy.com/media/g01ZnwAUvutuK8GIQn/giphy.gif?cid=ecf05e47x0ty41gdmij1uumy2neys7g2mtj6b399ozks3fkn&ep=v1_gifs_search&rid=giphy.gif&ct=g" />
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>404 Not Found</h2>
+    <img src="https://media.giphy.com/media/g01ZnwAUvutuK8GIQn/giphy.gif?cid=ecf05e47x0ty41gdmij1uumy2neys7g2mtj6b399ozks3fkn&ep=v1_gifs_search&rid=giphy.gif&ct=g" />
+{% endblock %}

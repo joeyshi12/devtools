@@ -30,19 +30,19 @@ def create_app() -> Flask:
 
     @app.route("/")
     def index() -> Response:
-        return Response(render_template("index.html"))
+        return render_template("index.html", title="Devtools")
 
     @app.route("/csv_vis")
     def csv_vis() -> Response:
-        return Response(render_template("csv_vis.html"))
+        return render_template("csv_vis.html", title="CSV Visualizer")
 
     @app.errorhandler(404)
     def page_not_found(e: Exception) -> Response:
-        return Response(render_template("404.html"), 404)
+        return render_template("404.html", title="Page Not Found | Devtools"), 404
 
     @app.errorhandler(Exception)
     def internal_server_error(e: Exception) -> Response:
         logger.error("Internal server error: %s", e)
-        return Response(render_template("500.html"), 500)
+        return render_template("500.html", title="Internal Server Error | Devtools"), 500
 
     return app

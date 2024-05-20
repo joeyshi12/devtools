@@ -1,22 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Devtools</title>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Handy tools for software development." />
-    <meta name="author" content="Joey Shi" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/static/css/common.css"/>
-</head>
-<body>
-    <h1>Joey's Devtools</h1>
-    <p>A collection of handy tools used to assist in some common problems in web development.</p>
-    <ul>
-        <li><a href="/webhook">Webhook Debugger</a></li>
-        <li><a href="/jdtt">JSON Schema Transcompiler</a></li>
-        <li><a href="/csv_vis">CSV Visualizer</a></li>
+{% extends "base.html" %}
+
+{% block content %}
+    <p>A collection of handy tools I've developed to solve some common problems I've encountered in web development.</p>
+    <ul class="tool-list">
+        <li>
+            <a href="/webhook">
+                <div>
+                    <label>Webhook debugger</label>
+                    <p>An intermediary for inspecting request contents from webhooks.</p>
+                </div>
+            </a>
+        </li>
+        <li>
+            <a href="/jdtt">
+                <div>
+                    <label>JSON data type transcompiler</label>
+                    <p>Python CLI tool and library for generating data type models for given JSON objects.</p>
+                </div>
+            </a>
+        </li>
+        <li>
+            <a href="/csv_vis">
+                <div>
+                    <label>CSV visualizer</label>
+                    <p>A query-based 2D data visualization generator, powered by a custom DSL parsing library.</p>
+                </div>
+            </a>
+        </li>
     </ul>
-    <p>If you find any of these tools useful, consider <a href="https://www.buymeacoffee.com/joeyshi12">buying me a pizza</a></p>
-</body>
-</html>
+    <p>If you find any of these tools useful, consider <i class="fa-solid fa-pizza-slice"></i> <a href="https://www.buymeacoffee.com/joeyshi12">buying me a pizza</a> 🙂.</p>
+{% endblock %}

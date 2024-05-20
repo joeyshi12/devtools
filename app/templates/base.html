@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="UTF-8" />
+    <meta name="description" content="A collection of handy tools I've developed to solve some common problems I've encountered in web development." />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <link rel="stylesheet" href="/static/css/common.css"/>
+    {% block styles %}
+    {% endblock %}
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+    <nav>
+        <ul class="breadcrumbs">
+            {% block breadcrumbs %}
+            <li><a href="/">Joey's devtools</a></li>
+            {% endblock %}
+        </ul>
+        <div>
+            <a href="https://www.buymeacoffee.com/joeyshi12"><i class="icon fa-solid fa-pizza-slice"></i></a>
+            <a href="https://github.com/joeyshi12/devtools"><i class="icon fa-brands fa-github-alt"></i></a>
+        </div>
+    </nav>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

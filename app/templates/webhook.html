@@ -1,55 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Webhook</title>
-    <meta charset="UTF-8" />
-    <meta name="author" content="Joey Shi" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/static/css/common.css"/>
+{% extends "base.html" %}
+
+{% block styles %}
     <link rel="stylesheet" href="/static/css/webhook.css"/>
-</head>
-<body>
-<h1>Webhook Debugger</h1>
-<a href="/">Return to homepage</a>
-<p>Send requests to <code>/webhook/{{webhook_id}}/capture</code> and this page will display the request body, headers, and cookies.</p>
-<div>
-    <button id="clear-captures-button">Clear captures</button>
-</div>
-<ul class="request-list">
-{% for request in history|reverse %}
-    <li class="request-info">
-        <table>
-            <tbody>
-                <tr>
-                    <td>{{request.method}}</td>
-                    <td>{{request.url}}</td>
-                </tr>
-                <tr>
-                    <td>Request headers</td>
-                    <td>
-                        <ul class="td-list">
-                        {% for key, value in request.headers.items() %}
-                            <li>{{key}} = {{value}}</li>
-                        {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Request body</td>
-                    <td>{{request.body}}</td>
-                </tr>
-            </tbody>
-        </table>
-    </li>
-{% endfor %}
-</ul>
-<script>
-    document.getElementById("clear-captures-button").onclick = () => {
-        fetch("/webhook/{{webhook_id}}", { method: "DELETE" }).then(() => {
-            window.location.href = "/webhook"
-        });
-    };
-</script>
-</body>
-</html>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/">Joey's devtools</a></li>
+    <li>Webhook</li>
+{% endblock %}
+
+{% block content %}
+    <p>Send requests to <pre><code>https://devtools.joeyshi.xyz/webhook/{{webhook_id}}/capture</code></pre> and this page will display the request body, headers, and cookies.</p>
+    <div>
+        <button id="clear-captures-button">Clear captures</button>
+    </div>
+    <ul class="request-list">
+    {% for request in history|reverse %}
+        <li class="request-info">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>{{request.method}}</td>
+                        <td>{{request.url}}</td>
+                    </tr>
+                    <tr>
+                        <td>Request headers</td>
+                        <td>
+                            <ul class="td-list">
+                            {% for key, value in request.headers.items() %}
+                                <li>{{key}} = {{value}}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Request body</td>
+                        <td>{{request.body}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </li>
+    {% endfor %}
+    </ul>
+    <script>
+        document.getElementById("clear-captures-button").onclick = () => {
+            fetch("/webhook/{{webhook_id}}", { method: "DELETE" }).then(() => {
+                window.location.href = "/webhook"
+            });
+        };
+    </script>
+{% endblock %}

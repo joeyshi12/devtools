@@ -1,6 +1,5 @@
 import datetime
 import logging
-import uuid
 from flask import Blueprint, render_template, Response, request, session, redirect
 import app.database_connection as db
 from dataclasses import asdict
@@ -27,7 +26,7 @@ def webhook_history(webhook_id: str) -> Response:
         "webhook_id": webhook_id,
         "history": captures
     }
-    return Response(render_template("webhook.html", **params))
+    return Response(render_template("webhook.html", title="Webhook", **params))
 
 
 @webhook_blueprint.route("/<webhook_id>/capture", methods=HTTP_METHODS)

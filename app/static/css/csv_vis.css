@@ -1,12 +1,16 @@
-.pql-description {
-    margin-bottom: 1rem;
+.description {
+    margin: 1rem 0;
+    & p {
+        margin: 0;
+    }
 }
 
 .form-param {
     margin: 0.5rem 0;
-    & > label {
+    & label {
         display: inline-block;
         width: 6rem;
+        font-weight: bold;
     }
 }
 

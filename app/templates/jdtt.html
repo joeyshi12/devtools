@@ -1,17 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>JSON Schema Data Type Transcompiler</title>
-    <meta charset="UTF-8" />
-    <meta name="author" content="Joey Shi" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/static/css/common.css"/>
+{% extends "base.html" %}
+
+{% block styles %}
     <link rel="stylesheet" href="/static/css/jdtt.css"/>
-</head>
-<body>
-    <h1>JSON Schema Transcompiler</h1>
-    <a href="/">Return to homepage</a>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/">Joey's devtools</a></li>
+    <li>JSON data type transcompiler</li>
+{% endblock %}
+
+{% block content %}
     <div class="description">
         <p>Converts JSON Schema data types to other languages.</p>
         <p>This service is a wrapper for a Python library I made: <a href="https://github.com/joeyshi12/json-data-type-transcompiler">jdtt</a></p>
@@ -51,5 +49,4 @@
         </div>
     </form>
     <script src="/static/js/jdtt.js" type="text/javascript" charset="utf-8"></script>
-</body>
-</html>
+{% endblock %}

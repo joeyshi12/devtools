@@ -1,13 +1,13 @@
 .description {
     margin: 1rem 0;
-    p {
+    & p {
         margin: 0;
     }
 }
 
 .param-section {
     margin-top: 0.3rem;
-    .param-label {
+    & .param-label {
         display: inline-block;
         width: 10rem;
         text-align: left;

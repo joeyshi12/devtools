@@ -1,18 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Internal Server Error | Devtools</title>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Handy tools for software development." />
-    <meta name="author" content="Joey Shi" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-</head>
-<body>
-    <h1>500 Internal Server Error</h1>
-    <a href="/">Return to homepage</a>
-    <div>
-        <img src="https://i.imgflip.com/5q7ff0.gif" alt="dying-emoji" />
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>500 Internal Server Error</h2>
+    <img src="https://i.imgflip.com/5q7ff0.gif" alt="dying-emoji" />
+{% endblock %}
