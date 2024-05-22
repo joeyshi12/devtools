@@ -10,14 +10,16 @@
     <link rel="stylesheet" href="/static/css/common.css">
     {% block styles %}
     {% endblock %}
-    <link rel="icon" href="/static/favicon.png" type="image/png">
+    <link rel="icon" type="image/png" href="/static/images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/static/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/static/images/favicon-48x48.png" sizes="48x48">
 </head>
 <body>
     <nav>
         <ul class="breadcrumbs">
-        {% block breadcrumbs %}
-            <li><a href="/"><img src="/static/favicon.png" />Joey's devtools</a></li>
-        {% endblock %}
+            {% block breadcrumbs %}
+            <li><a href="/"><img src="/static/images/logo.png" />Joey's devtools</a></li>
+            {% endblock %}
         </ul>
         <div>
             <a href="https://www.buymeacoffee.com/joeyshi12"><i class="icon fa-solid fa-pizza-slice"></i></a>
