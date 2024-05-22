@@ -40,7 +40,7 @@ ul.breadcrumbs {
         & img {
             width: 40px;
             vertical-align: middle;
-            padding-right: 0.8rem;
+            padding-right: 0.5rem;
         }
     }
 }
