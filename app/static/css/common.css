@@ -8,6 +8,13 @@ body {
     font-kerning: normal;
 }
 
+.description {
+    margin: 1rem 0;
+    & p {
+        margin: 0;
+    }
+}
+
 code {
     background-color: #eee;
     padding: 0.2em;

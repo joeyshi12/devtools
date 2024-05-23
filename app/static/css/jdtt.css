@@ -1,10 +1,3 @@
-.description {
-    margin: 1rem 0;
-    & p {
-        margin: 0;
-    }
-}
-
 .param-section {
     margin-top: 0.3rem;
     & .param-label {
