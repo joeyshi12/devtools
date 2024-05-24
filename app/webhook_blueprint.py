@@ -22,11 +22,7 @@ def index() -> Response:
 @webhook_blueprint.route("/<webhook_id>")
 def webhook_history(webhook_id: str) -> Response:
     captures = db.get_request_captures(webhook_id)
-    params = {
-        "webhook_id": webhook_id,
-        "history": captures
-    }
-    return Response(render_template("webhook.html", title="Webhook", **params))
+    return Response(render_template("webhook.html", title="Webhook Tester", webhook_id=webhook_id, history=captures))
 
 
 @webhook_blueprint.route("/<webhook_id>/capture", methods=HTTP_METHODS)
