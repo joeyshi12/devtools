@@ -10,7 +10,8 @@ export const commonConfig = {
             import: "./src/csv_vis",
             dependOn: "ace"
         },
-        "ace": "ace-builds"
+        "ace": "ace-builds",
+        "worker-json": "ace-builds/src-min-noconflict/worker-json.js"
     },
     output: {
         path: path.join(__dirname, "../app/static"),
