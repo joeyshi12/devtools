@@ -1,11 +1,12 @@
 import json
 import logging
 from typing import Optional
-from flask import Blueprint, Response, render_template, request
+from flask import Response, render_template, request
 from jdtt.transcompilation import transcompile
 from jdtt.exceptions import JDTTException
+from app.base_blueprint import BaseBlueprint
 
-jdtt_blueprint = Blueprint("jdtt", __name__)
+jdtt_blueprint = BaseBlueprint("jdtt", __name__)
 logger = logging.getLogger("waitress")
 
 

@@ -1,14 +1,15 @@
 import datetime
 import logging
-from flask import Blueprint, render_template, Response, request, session, redirect
+from flask import render_template, Response, request, session, redirect
 import app.database_connection as db
+from app.base_blueprint import BaseBlueprint
 from dataclasses import asdict
 
 WEBHOOK_SESSION_ID_KEY = "webhook_id"
 MAX_HIST_SIZE = 20
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
-webhook_blueprint = Blueprint("webhook", __name__)
+webhook_blueprint = BaseBlueprint("webhook", __name__)
 logger = logging.getLogger("waitress")
 
 
