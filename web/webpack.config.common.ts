@@ -2,14 +2,24 @@ import * as path from "node:path";
 
 export const commonConfig = {
     entry: {
-        "jdtt": "./src/jdtt",
-        "csv_vis": "./src/csv_vis"
+        "jdtt": {
+            import: "./src/jdtt",
+            dependOn: "ace"
+        },
+        "csv_vis": {
+            import: "./src/csv_vis",
+            dependOn: "ace"
+        },
+        "ace": "ace-builds"
     },
     output: {
         path: path.join(__dirname, "../app/static"),
         filename: "js/[name].js",
         chunkFormat: "array-push",
         hashFunction: "sha256"
+    },
+    optimization: {
+        runtimeChunk: "single"
     },
     resolve: {
         extensions: [".ts", ".js"]

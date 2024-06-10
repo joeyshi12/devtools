@@ -1,8 +1,19 @@
-import * as d3Dsv from 'd3-dsv';
-import { PQLStatement, RowData } from 'pql-parser';
+import * as d3Dsv from "d3-dsv";
+import { PQLStatement, RowData } from "pql-parser";
+import { PqlEditorMode } from "./mode_pql";
+import "ace-builds/src-min-noconflict/ace";
+import "ace-builds/src-min-noconflict/ext-language_tools";
 
 let data: RowData[] = [];
-const queryInputElement = <HTMLInputElement>document.getElementById("query-input")
+
+const editor = ace.edit("query-input");
+editor.session.setMode(<any>new PqlEditorMode());
+editor.setOptions({
+    enableBasicAutocompletion: true,
+    enableSnippets: true,
+    enableLiveAutocompletion: true,
+});
+
 const saveButtonElement = <HTMLButtonElement>document.getElementById("save-button");
 const plotContainerElement = document.getElementById("plot-container");
 const filePreviewElement = document.getElementById("file-preview");
@@ -78,14 +89,16 @@ document.getElementById("csv-input").addEventListener("change", (event: any) => 
     reader.readAsText(file,"UTF-8");
 });
 
-queryInputElement.addEventListener("keydown", (event: any) => {
-    if (event.key === "Enter") {
-        renderPlot(event.target.value);
-    }
+document.getElementById("query-button").addEventListener("click", () => {
+    renderPlot(editor.getValue());
 });
 
-document.getElementById("query-button").addEventListener("click", () => {
-    renderPlot(queryInputElement.value);
+editor.commands.addCommand({
+    name: "executeQuery",
+    bindKey: {win: "Ctrl-Enter", mac: "Ctrl-Enter"},
+    exec: () => {
+        renderPlot(editor.getValue());
+    }
 });
 
 saveButtonElement.addEventListener("click", () => {

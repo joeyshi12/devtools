@@ -1,5 +1,5 @@
-import 'ace-builds/src-noconflict/ace';
-import 'ace-builds/src-noconflict/mode-json';
+import "ace-builds/src-noconflict/ace";
+import "ace-builds/src-noconflict/mode-json";
 
 const editor = ace.edit("editor");
 editor.session.setMode("ace/mode/json");
