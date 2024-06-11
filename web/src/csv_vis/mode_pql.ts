@@ -6,7 +6,7 @@ class PqlHighlightRules extends ace.require("ace/mode/text_highlight_rules").Tex
         const keywordMapper = this.createKeywordMapper({
             "support.function": "bar|line|scatter|min|max|avg|count|sum",
             "constant.language": "null",
-            "keyword": "plot|where|groupby|limit|offset"
+            "keyword": "plot|where|groupby|limit|offset|and|or"
         }, "identifier", true);
         this.$rules = {
             "start": [

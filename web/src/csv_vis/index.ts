@@ -14,10 +14,6 @@ editor.setOptions({
     enableLiveAutocompletion: true,
 });
 
-const saveButtonElement = <HTMLButtonElement>document.getElementById("save-button");
-const plotContainerElement = document.getElementById("plot-container");
-const filePreviewElement = document.getElementById("file-preview");
-
 function renderPlot(query: string) {
     if (data.length === 0) {
         alert("No input file provided");
@@ -33,11 +29,15 @@ function renderPlot(query: string) {
         const plotElement = document.createElement("div");
         plotElement.className = "card";
         plotElement.appendChild(svg);
+
+        const plotContainerElement = document.getElementById("plot-container");
         if (plotContainerElement.childNodes.length > 0) {
             plotContainerElement.replaceChild(plotElement, plotContainerElement.childNodes[0]);
         } else {
             plotContainerElement.appendChild(plotElement);
         }
+
+        const saveButtonElement = <HTMLButtonElement>document.getElementById("save-button");
         if (saveButtonElement.disabled) {
             saveButtonElement.disabled = false;
         }
@@ -46,8 +46,10 @@ function renderPlot(query: string) {
     }
 }
 
-function renderTablePreview(data: RowData[], pageSize: number) {
+function renderTablePreview(maxLines: number) {
+    const filePreviewElement = document.getElementById("table-preview");
     if (data.length === 0) {
+        filePreviewElement.textContent = "";
         return;
     }
 
@@ -61,7 +63,7 @@ function renderTablePreview(data: RowData[], pageSize: number) {
     }
 
     const bodyElement = tableElement.createTBody();
-    for (let i = 0; i < Math.min(data.length, pageSize); i++) {
+    for (let i = 0; i < Math.min(data.length, maxLines); i++) {
         const rowElement = bodyElement.insertRow();
         for (let key of keys) {
             const cellElement = rowElement.insertCell();
@@ -76,23 +78,6 @@ function renderTablePreview(data: RowData[], pageSize: number) {
     }
 }
 
-document.getElementById("csv-input").addEventListener("change", (event: any) => {
-    const file = event.target.files[0];
-    if (!file) {
-        return;
-    }
-    const reader = new FileReader();
-    reader.addEventListener("load", (event: any) => {
-        data = d3Dsv.csvParse(event.target.result);
-        renderTablePreview(data, 5);
-    });
-    reader.readAsText(file,"UTF-8");
-});
-
-document.getElementById("query-button").addEventListener("click", () => {
-    renderPlot(editor.getValue());
-});
-
 editor.commands.addCommand({
     name: "executeQuery",
     bindKey: {win: "Ctrl-Enter", mac: "Ctrl-Enter"},
@@ -101,7 +86,27 @@ editor.commands.addCommand({
     }
 });
 
-saveButtonElement.addEventListener("click", () => {
+document.getElementById("csv-input").addEventListener("change", (event: any) => {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener("load", (event: any) => {
+        data = d3Dsv.csvParse(event.target.result);
+        if (data.length === 0) {
+            alert(`No rows found in ${file.name}`);
+        }
+        renderTablePreview(5);
+    });
+    reader.readAsText(file,"UTF-8");
+});
+
+document.getElementById("plot-button").addEventListener("click", () => {
+    renderPlot(editor.getValue());
+});
+
+document.getElementById("save-button").addEventListener("click", () => {
     const svgElement = document.getElementsByTagName("svg")[0]
     if (!svgElement) {
         return;
