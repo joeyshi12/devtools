@@ -7,6 +7,10 @@
     }
 }
 
+#table-preview {
+    overflow-x: auto;
+}
+
 #query-input {
     border-style: solid;
     border-width: 1px;
