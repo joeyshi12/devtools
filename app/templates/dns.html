@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="/static/css/dns.css">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>DNS</li>
+{% endblock %}
+
+{% block content %}
+    <p>A DNS name lookup tool.</p>
+    <div>
+        <label>Domain:</label>
+        <input id="domain" type="text" placeholder="www.example.com" />
+    </div>
+    <div>
+        <label>Root server:</label>
+        <input id="root-server" type="text" placeholder="192.33.4.12" />
+    </div>
+    <div>
+        <label>Record types:</label>
+        <select id="record-type">
+            <option value="A">A</option>
+            <option value="AAAA">AAAA</option>
+        </select>
+    </div>
+    <button id="lookup-button">Lookup</button
+    <svg width=960 height=900><g/></svg>
+    <script src="/static/js/runtime.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/dns.js" type="text/javascript" charset="utf-8"></script>
+{% endblock %}
