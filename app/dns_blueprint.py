@@ -1,13 +1,17 @@
 import socket
-import struct
 import logging
-import random
 from dataclasses import dataclass
 from flask import render_template, Response, request
 from app.base_blueprint import BaseBlueprint
+from app.dns import dns_query
 
 dns_blueprint = BaseBlueprint("dns", __name__)
 logger = logging.getLogger("waitress")
+
+@dataclass
+class DNSNode:
+    name: str
+    ip_addr: str
 
 
 @dns_blueprint.route("/")
@@ -27,97 +31,56 @@ def query() -> Response:
     if record_type is None:
         record_type = "A"
 
+    node_map = {}
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        response = build_and_send_query(domain_name, root_ip, sock)
-        decode_response(response)
+        print(dns_lookup(DNSNode("root", root_ip), domain_name, node_map, set(), sock))
 
-    return {
-        "1": domain_name,
-        "2": root_ip,
-        "3": record_type
-    }
+    return node_map
 
 
-def build_and_send_query(domain_name: str, name_server_ip: str, sock: socket.socket) -> bytes:
-    message = bytearray()
-    packet_id = random.randbytes(2)
-    message.extend(packet_id)
-    message.append(0)             # QR opcode AA TC RD
-    message.append(0)             # RA Z RCODE
-    message.extend(b"\x00\x01")   # Query count
-    message.extend(b"\x00\x00")   # Answer count
-    message.extend(b"\x00\x00")   # Name server records
-    message.extend(b"\x00\x00")   # Additional record count
+def dns_lookup(curr_node: DNSNode,
+               domain_name: str,
+               node_map: dict[str, DNSNode],
+               visited_names: set[str],
+               sock: socket.socket):
+    visited_names.add(curr_node.name)
+    node_map[curr_node.name] = curr_node
+    response = dns_query(domain_name, curr_node.ip_addr, sock)
+    print(curr_node, response.is_authoritative)
 
-    for label in domain_name.split("."):
-        message.append(len(label) & 0xff)
-        message.extend(bytes(label, "utf-8"))
+    for record in response.an_records:
+        node_map[record.name] = DNSNode(record.name, record.rdata)
 
-    message.append(0)             # End of QName
-    message.extend(b"\x00\x00")   # QTYPE
-    message.extend(b"\x00\x01")   # QCLASS
-
-    sock.sendto(message, (name_server_ip, 53))
-    return sock.recv(512)
-
-
-def decode_response(response: bytes):
-    response_id = struct.unpack(">H", response[:2])[0]
-
-    is_authoritative = response[3] & 0b00000100
-    an_count = struct.unpack(">H", response[6:8])[0]
-    ns_count = struct.unpack(">H", response[8:10])[0]
-    ar_count = struct.unpack(">H", response[10:12])[0]
-    name = read_ns_resource(response, 12).decode("utf-8")
-    offset = 18 + len(name)
-
-    an_records = []
-    ns_records = []
-    ar_records = []
-    for _ in range(an_count + ns_count + ar_count):
-        name = read_ns_resource(response, offset)
-        offset += 2 + len(name)
-        type_code = struct.unpack(">H", response[offset:offset + 2])[0]
-        offset += 4  # skip CLASS
-        ttl = struct.unpack(">I", response[offset:offset + 4])[0]
-        offset += 6  # skip RDLENGTH
-        match type_code:
-            case 1:
-                print("A")
-                print(response[offset:offset + 4])
-                offset += 4
-            case 2 | 5:
-                print("NS or CNAME")
-                name = read_ns_resource(response, offset)
-                print(name.decode("utf-8"))
-                offset += 2 + len(name)
-            case 28:
-                print("AAAA")
-            case _:
-                print("OTHER")
-
-
-def read_ns_resource(buf: bytes, offset: int) -> bytearray:
-    resource_bytes = bytearray()
-    current_byte = buf[offset]
-    remaining_chars = 0
-    while current_byte != 0:
-        if ((current_byte & 0xc0) == 0xc0 or remaining_chars == 0) and len(resource_bytes) > 0:
-            resource_bytes.append(0x2e)
-
-        if ((current_byte & 0xc0) == 0xc0):
-            offset += 1
-            name_offset = ((current_byte & 0x3f) << 4) + buf[offset]
-            resource_bytes.extend(read_ns_resource(buf, name_offset))
-            return resource_bytes
-
-        if (remaining_chars == 0):
-            remaining_chars = current_byte
+    if response.is_authoritative:
+        if len(response.an_records) > 0:
+            return node_map[response.an_records[0].name]
         else:
-            resource_bytes.append(current_byte)
-            remaining_chars -= 1
+            print(response.an_records)
 
-        offset += 1
-        current_byte = buf[offset]
+    for record in response.ar_records:
+        if record.rtype == 1 or record == 28:
+            node_map[record.name] = DNSNode(record.name, record.rdata)
 
-    return resource_bytes
+    for record in response.ns_records:
+        if record.rtype != 2 or record.rdata not in node_map:
+            continue
+        ns_node = node_map[record.rdata]
+        if ns_node.name in visited_names:
+            continue
+        answer = dns_lookup(ns_node, domain_name, node_map, visited_names, sock)
+        if answer:
+            return answer
+
+    for record in response.ns_records:
+        if record.rtype != 2 or record.rdata in node_map:
+            continue
+        ns_answer = dns_lookup(node_map["root"], record.rdata, node_map, set(), sock)
+        if ns_answer is None:
+            continue
+        if ns_answer.name in visited_names:
+            continue
+        answer = dns_lookup(ns_answer, domain_name, node_map, visited_names, sock)
+        if answer:
+            return answer
+
+    return None
