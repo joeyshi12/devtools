@@ -10,6 +10,7 @@ export const commonConfig = {
             import: "./src/csv_vis",
             dependOn: "ace"
         },
+        "dns": "./src/dns",
         "ace": "ace-builds",
         "worker-json": "ace-builds/src-min-noconflict/worker-json.js"
     },

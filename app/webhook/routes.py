@@ -1,32 +1,30 @@
 import datetime
 import logging
 from flask import render_template, Response, request, session, redirect
-import app.database_connection as db
-from app.base_blueprint import BaseBlueprint
-from dataclasses import asdict
+from . import webhook
+from .database import *
 
 WEBHOOK_SESSION_ID_KEY = "webhook_id"
 MAX_HIST_SIZE = 20
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
-webhook_blueprint = BaseBlueprint("webhook", __name__)
 logger = logging.getLogger("waitress")
 
 
-@webhook_blueprint.route("/")
+@webhook.route("/")
 def index() -> Response:
-    if WEBHOOK_SESSION_ID_KEY not in session or not db.webhook_history_exists(session[WEBHOOK_SESSION_ID_KEY]):
-        session[WEBHOOK_SESSION_ID_KEY] = db.create_request_history()
+    if WEBHOOK_SESSION_ID_KEY not in session or not webhook_history_exists(session[WEBHOOK_SESSION_ID_KEY]):
+        session[WEBHOOK_SESSION_ID_KEY] = create_request_history()
     return redirect(f"/webhook/{session[WEBHOOK_SESSION_ID_KEY]}")
 
 
-@webhook_blueprint.route("/<webhook_id>")
+@webhook.route("/<webhook_id>")
 def webhook_history(webhook_id: str) -> Response:
-    captures = db.get_request_captures(webhook_id)
+    captures = get_request_captures(webhook_id)
     return Response(render_template("webhook.html", title="Webhook Tester", webhook_id=webhook_id, history=captures))
 
 
-@webhook_blueprint.route("/<webhook_id>/capture", methods=HTTP_METHODS)
+@webhook.route("/<webhook_id>/capture", methods=HTTP_METHODS)
 def capture_request(webhook_id: str) -> Response:
     capture = db.RequestCapture(
         request.url,
@@ -37,21 +35,22 @@ def capture_request(webhook_id: str) -> Response:
     )
 
     # delete captures if max history size is exceeded
-    captures = db.get_request_captures(webhook_id)
+    captures = get_request_captures(webhook_id)
     if len(captures) >= MAX_HIST_SIZE:
         expire_date = captures[-MAX_HIST_SIZE].creation_date
-        db.delete_request_captures(webhook_id, expire_date)
+        delete_request_captures(webhook_id, expire_date)
 
     try:
-        db.insert_request_capture(webhook_id, capture)
+        insert_request_capture(webhook_id, capture)
         logger.info("Captured request [method=%s] [url=%s]", capture.method, capture.url)
-        return asdict(capture)
+        return capture
     except Exception as e:
         logger.error("Failed to capture request: %s", e)
         return Response("Failed to capture request", status=500, mimetype="text/plain")
 
 
-@webhook_blueprint.route("/<webhook_id>", methods=["DELETE"])
+@webhook.route("/<webhook_id>", methods=["DELETE"])
 def delete_history(webhook_id: str) -> Response:
-    db.delete_request_captures(webhook_id)
+    delete_request_captures(webhook_id)
     return Response(status=204)
+
