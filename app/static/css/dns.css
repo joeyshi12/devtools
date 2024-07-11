@@ -1,3 +1,19 @@
+.form-param {
+    margin: 0.5rem 0;
+    & label {
+        display: inline-block;
+        width: 6rem;
+        font-weight: bold;
+    }
+}
+
+svg {
+    flex: 1;
+    width: 100%;
+    border: 1px solid;
+    margin-bottom: 2rem;
+}
+
 .node rect {
   stroke: #333;
   fill: #fff;

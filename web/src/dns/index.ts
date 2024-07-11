@@ -3,53 +3,58 @@ import * as dagreD3 from 'dagre-d3-es';
 
 
 document.getElementById("lookup-button").addEventListener("click", async () => {
-    const domain = getInputValue("domain") ?? "www.example.com";
+    const domain = getInputValue("domain");
     const rootServer = getInputValue("root-server");
-    const recordType = getInputValue("record-type");
-    let uri = `/dns/query?name=${domain}`;
-    if (rootServer) {
-        uri = uri + `&root=${rootServer}`;
+    if (!domain || domain.length === 0) {
+        alert("Missing domain.");
+        return;
     }
-    if (recordType) {
-        uri = uri + `&type=${recordType}`;
-    }
-    const response = await fetch(uri);
-    const json = await response.json();
-    renderDnsGraph(json);
+    const lookupResult = await fetchLookupResult(domain, rootServer);
+    renderDnsGraph(lookupResult);
 });
 
-function getInputValue(id: string): string {
-    const textInput = <HTMLInputElement>document.getElementById(id);
-    return textInput.value;
+async function fetchLookupResult(domain: string, rootServer?: string) {
+    let uri = `/dns/query?name=${domain}`;
+    if (rootServer && rootServer.length > 0) {
+        uri = uri + `&root=${rootServer}`;
+    }
+    const response = await fetch(uri);
+    return await response.json();
 }
 
 function renderDnsGraph(json: any) {
-    // Create a new directed graph
-    var g = new dagreD3.graphlib.Graph().setGraph({});
+    const graph = new dagreD3.graphlib.Graph().setGraph({});
 
     const nodeNames = new Set();
     for (let name in json.referrals) {
         for (let targetName of json.referrals[name]) {
             nodeNames.add(name);
             nodeNames.add(targetName);
-            g.setEdge(name, targetName, {});
+            graph.setEdge(name, targetName, {});
         }
     }
-
     for (let name of Array.from(nodeNames)) {
-        g.setNode(name, { label: name });
+        graph.setNode(name, { label: name });
     }
 
-    console.log(g.nodes());
-    console.log(g.edges());
+    const svg = d3Select.select("svg");
+    const inner = svg.select("g");
 
-    var svg = d3Select.select("svg"),
-    inner = svg.select("g");
-
-    // Create the renderer
     // @ts-ignore
-    var render = new dagreD3.render();
+    const render = new dagreD3.render();
+    render(inner, graph);
 
-    // Run the renderer. This is what draws the final graph.
-    render(inner, g);
+    const svgBox = (svg.node() as SVGSVGElement).getBoundingClientRect();
+    const groupBox = (inner.node() as SVGGElement).getBoundingClientRect();
+    const x = (svgBox.width - groupBox.width) / 2;
+    inner.attr("transform", `translate(${x},10)`)
 }
+
+function getInputValue(id: string): string {
+    const textInput = <HTMLInputElement>document.getElementById(id);
+    return textInput.value;
+}
+
+fetchLookupResult("www.example.com").then((lookupResult: any) => {
+    renderDnsGraph(lookupResult);
+});
