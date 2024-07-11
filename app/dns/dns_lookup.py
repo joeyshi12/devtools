@@ -31,9 +31,11 @@ def dns_lookup(curr_node: DNSNode,
             node_map[record.name] = DNSNode(record.name, record.rdata)
 
     for record in response.ns_records:
-        if record.rtype != 2 or record.rdata not in node_map:
+        if record.rtype != 2:
             continue
-        ns_node = node_map[record.rdata]
+        ns_node = node_map[record.rdata] \
+            if record.rdata in node_map \
+            else dns_lookup(node_map["root"], record.rdata, node_map, node_referrals, set(), sock)
         if ns_node.name in visited_names:
             continue
         if curr_node.name in node_referrals:
@@ -41,20 +43,6 @@ def dns_lookup(curr_node: DNSNode,
         else:
             node_referrals[curr_node.name] = [ns_node.name]
         answer = dns_lookup(ns_node, domain_name, node_map, node_referrals, visited_names, sock)
-        if answer:
-            return answer
-
-    for record in response.ns_records:
-        if record.rtype != 2 or record.rdata in node_map:
-            continue
-        ns_answer = dns_lookup(node_map["root"], record.rdata, node_map, node_referrals, set(), sock)
-        if ns_answer is None or ns_answer.name in visited_names:
-            continue
-        if curr_node.name in node_referrals:
-            node_referrals[curr_node.name].append(ns_answer.name)
-        else:
-            node_referrals[curr_node.name] = [ns_answer.name]
-        answer = dns_lookup(ns_answer, domain_name, node_map, node_referrals, visited_names, sock)
         if answer:
             return answer
 
