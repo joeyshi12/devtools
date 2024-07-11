@@ -3,9 +3,9 @@ import logging
 from datetime import datetime
 from flask import Flask, Response, render_template
 from flask_session import Session
-from app.webhook_blueprint import webhook_blueprint
-from app.jdtt_blueprint import jdtt_blueprint
-from app.dns_blueprint import dns_blueprint
+from .webhook import webhook
+from .jdtt import jdtt
+from .dns import dns
 
 
 def create_app() -> Flask:
@@ -15,9 +15,9 @@ def create_app() -> Flask:
     app.config["SESSION_TYPE"] = "filesystem"
     Session(app)
 
-    app.register_blueprint(webhook_blueprint, url_prefix="/webhook")
-    app.register_blueprint(jdtt_blueprint, url_prefix="/jdtt")
-    app.register_blueprint(dns_blueprint, url_prefix="/dns")
+    app.register_blueprint(webhook, url_prefix="/webhook")
+    app.register_blueprint(jdtt, url_prefix="/jdtt")
+    app.register_blueprint(dns, url_prefix="/dns")
 
     os.makedirs("logs", exist_ok=True)
     logging.basicConfig(

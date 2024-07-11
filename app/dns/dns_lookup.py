@@ -2,24 +2,63 @@ import socket
 import struct
 import base64
 import random
-from dataclasses import dataclass
+from .models import DNSNode, DNSQueryResponse, ResourceRecord
 
 MAX_RECV_ITS = 4
 
-@dataclass
-class ResourceRecord:
-    name: str
-    rtype: int
-    rdata: str
 
-@dataclass
-class DNSQueryResponse:
-    id: int
-    name: str
-    is_authoritative: bool
-    an_records: list[ResourceRecord]
-    ns_records: list[ResourceRecord]
-    ar_records: list[ResourceRecord]
+def dns_lookup(curr_node: DNSNode,
+               domain_name: str,
+               node_map: dict[str, DNSNode],
+               node_referrals: dict[str, list[str]],
+               visited_names: set[str],
+               sock: socket.socket):
+    visited_names.add(curr_node.name)
+    node_map[curr_node.name] = curr_node
+    response = dns_query(domain_name, curr_node.ip_addr, sock)
+    curr_node.an_records = response.an_records
+    curr_node.ns_records = response.ns_records
+    curr_node.ar_records = response.ar_records
+
+    for record in response.an_records:
+        node_map[record.name] = DNSNode(record.name, record.rdata)
+
+    if len(response.an_records) > 0:
+        return node_map[response.an_records[0].name]
+
+    for record in response.ar_records:
+        if record.rtype == 1 or record == 28:
+            node_map[record.name] = DNSNode(record.name, record.rdata)
+
+    for record in response.ns_records:
+        if record.rtype != 2 or record.rdata not in node_map:
+            continue
+        ns_node = node_map[record.rdata]
+        if ns_node.name in visited_names:
+            continue
+        if curr_node.name in node_referrals:
+            node_referrals[curr_node.name].append(ns_node.name)
+        else:
+            node_referrals[curr_node.name] = [ns_node.name]
+        answer = dns_lookup(ns_node, domain_name, node_map, node_referrals, visited_names, sock)
+        if answer:
+            return answer
+
+    for record in response.ns_records:
+        if record.rtype != 2 or record.rdata in node_map:
+            continue
+        ns_answer = dns_lookup(node_map["root"], record.rdata, node_map, node_referrals, set(), sock)
+        if ns_answer is None or ns_answer.name in visited_names:
+            continue
+        if curr_node.name in node_referrals:
+            node_referrals[curr_node.name].append(ns_answer.name)
+        else:
+            node_referrals[curr_node.name] = [ns_answer.name]
+        answer = dns_lookup(ns_answer, domain_name, node_map, node_referrals, visited_names, sock)
+        if answer:
+            return answer
+
+    return None
 
 
 def dns_query(domain_name: str, name_server_ip: str, sock: socket.socket) -> DNSQueryResponse:
@@ -34,13 +73,6 @@ def dns_query(domain_name: str, name_server_ip: str, sock: socket.socket) -> DNS
 
     if response is None or response[:2] != query[:2]:
         raise Error(f"No response received from name server {name_server_ip}")
-
-    is_authoritative = bool(response[3] & 0b00000100)
-    if is_authoritative:
-        with open(f"out/{domain_name}_{name_server_ip}_query.bin", "wb") as f:
-            f.write(query)
-        with open(f"out/{domain_name}_{name_server_ip}_response.bin", "wb") as f:
-            f.write(response)
 
     return decode_response(response)
 
@@ -58,7 +90,7 @@ def build_query(domain_name: str) -> bytes:
 
     for label in domain_name.split("."):
         query.append(len(label) & 0xff)
-        query.extend(bytes(label, "utf-8"))
+        query.extend(bytes(label, "ascii"))
 
     query.append(0)             # End of QName
     query.extend(b"\x00\x01")   # QTYPE
@@ -68,7 +100,6 @@ def build_query(domain_name: str) -> bytes:
 
 def decode_response(response: bytes) -> DNSQueryResponse:
     response_id = struct.unpack(">H", response[:2])[0]
-    is_authoritative = bool(response[3] & 0b00000100)
     an_count, ns_count, ar_count = struct.unpack(">HHH", response[6:12])
     name_bytes, offset = read_name(response, 12)
     offset += 4
@@ -90,8 +121,7 @@ def decode_response(response: bytes) -> DNSQueryResponse:
 
     return DNSQueryResponse(
         response_id,
-        name_bytes.decode("utf-8"),
-        is_authoritative,
+        name_bytes.decode("ascii"),
         an_records,
         ns_records,
         ar_records
@@ -109,18 +139,18 @@ def read_resource_record(buf: bytes, offset: int) -> tuple[ResourceRecord, int]:
             rdata = ".".join([str(num) for num in buf[offset:offset + 4]])
         case 2 | 5:
             value_bytes, next_offset = read_name(buf, offset)
-            rdata = value_bytes.decode("utf-8")
+            rdata = value_bytes.decode("ascii")
             assert next_offset - offset == rdlength
         case 28:
             assert rdlength == 16
             hex_groups = []
-            encoded_buf = base64.b16encode(buf[offset:offset + 16]).decode("utf-8")
+            encoded_buf = base64.b16encode(buf[offset:offset + 16]).decode("ascii")
             for i in range(8):
                 hex_groups.append(encoded_buf[4 * i:4 * (i + 1)])
             rdata = ":".join(hex_groups)
 
     offset += rdlength
-    return ResourceRecord(name.decode("utf-8"), rtype, rdata), offset
+    return ResourceRecord(name.decode("ascii"), rtype, rdata), offset
 
 
 def read_name(buf: bytes, offset: int) -> tuple[str, int]:
