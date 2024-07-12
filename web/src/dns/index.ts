@@ -1,5 +1,6 @@
 import * as d3Select from 'd3-selection';
 import * as dagreD3 from 'dagre-d3-es';
+import { DNSLookupResult } from './models';
 
 
 document.getElementById("lookup-button").addEventListener("click", async () => {
@@ -10,7 +11,7 @@ document.getElementById("lookup-button").addEventListener("click", async () => {
         return;
     }
     const lookupResult = await fetchLookupResult(domain, rootServer);
-    renderDnsGraph(lookupResult);
+    renderDnsGraph(domain, lookupResult);
 });
 
 async function fetchLookupResult(domain: string, rootServer?: string) {
@@ -22,19 +23,32 @@ async function fetchLookupResult(domain: string, rootServer?: string) {
     return await response.json();
 }
 
-function renderDnsGraph(json: any) {
+function renderDnsGraph(domain: string, lookupResult: DNSLookupResult) {
+    console.log(domain);
     const graph = new dagreD3.graphlib.Graph().setGraph({});
 
-    const nodeNames = new Set();
-    for (let name in json.referrals) {
-        for (let targetName of json.referrals[name]) {
-            nodeNames.add(name);
-            nodeNames.add(targetName);
+    for (let node of lookupResult.nodes) {
+        const isAuthoritative = node.an_records.some(record => record.name === domain);
+        const color = isAuthoritative ? "#8df5b0" : "#a9deff";
+        graph.setNode(node.name, {
+            label: () => {
+                const div = document.createElement("div");
+                div.innerHTML = `
+                    <label>${node.name}</label>
+                    <p>${node.ip_addr}</p>
+                `;
+                return div;
+            },
+            style: `fill: ${color}`,
+            rx: 5,
+            ry: 5,
+        });
+    }
+
+    for (let name in lookupResult.referrals) {
+        for (let targetName of lookupResult.referrals[name]) {
             graph.setEdge(name, targetName, {});
         }
-    }
-    for (let name of Array.from(nodeNames)) {
-        graph.setNode(name, { label: name });
     }
 
     const svg = d3Select.select("svg");
@@ -56,5 +70,5 @@ function getInputValue(id: string): string {
 }
 
 fetchLookupResult("www.example.com").then((lookupResult: any) => {
-    renderDnsGraph(lookupResult);
+    renderDnsGraph("www.example.com", lookupResult);
 });

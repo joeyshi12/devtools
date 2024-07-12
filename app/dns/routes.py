@@ -25,10 +25,19 @@ def query() -> Response:
     node_map = {}
     referrals = {}
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        answer = dns_lookup(DNSNode("root", root_ip), domain_name, node_map, referrals, set(), sock)
+        root_node = DNSNode("root", root_ip)
+        answer = dns_lookup(root_node, domain_name, node_map, referrals, set(), sock)
+
+    node_names = set()
+    for name, targets in referrals.items():
+        if name in node_map:
+            node_names.add(name)
+        for target in targets:
+            if target in node_map:
+                node_names.add(target)
 
     return asdict(DNSLookupResult(
         answer.ip_addr if answer else None,
-        list(node_map.values()),
+        [node_map[name] for name in node_names],
         referrals
     ))

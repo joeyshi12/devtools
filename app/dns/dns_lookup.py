@@ -4,6 +4,8 @@ import base64
 import random
 from .models import DNSNode, DNSQueryResponse, ResourceRecord
 
+DNS_PORT = 53
+MAX_RECV_SIZE = 512
 MAX_RECV_ITS = 4
 
 
@@ -27,7 +29,9 @@ def dns_lookup(curr_node: DNSNode,
         return node_map[response.an_records[0].name]
 
     for record in response.ar_records:
-        if record.rtype == 1 or record == 28:
+        if record.rtype != 1 and record.rtype != 28:
+            continue
+        if record.name not in node_map:
             node_map[record.name] = DNSNode(record.name, record.rdata)
 
     for record in response.ns_records:
@@ -51,16 +55,16 @@ def dns_lookup(curr_node: DNSNode,
 
 def dns_query(domain_name: str, name_server_ip: str, sock: socket.socket) -> DNSQueryResponse:
     query = build_query(domain_name)
-    sock.sendto(query, (name_server_ip, 53))
+    sock.sendto(query, (name_server_ip, DNS_PORT))
 
     response = None
     for _ in range(MAX_RECV_ITS):
-        response = sock.recv(512)
+        response = sock.recv(MAX_RECV_SIZE)
         if response[:2] == query[:2]:
             break
 
     if response is None or response[:2] != query[:2]:
-        raise Error(f"No response received from name server {name_server_ip}")
+        raise Exception(f"No response received from name server {name_server_ip}")
 
     return decode_response(response)
 
