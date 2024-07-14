@@ -2,19 +2,19 @@ import socket
 import logging
 from flask import render_template, Response, request
 from dataclasses import asdict
-from . import dns
-from .models import DNSLookupResult, DNSNode
-from .dns_lookup import dns_lookup
+from . import dns_vis
+from .models import DNSLookupResult
+from .dns_lookup import DNSLookup
 
 logger = logging.getLogger("waitress")
 
 
-@dns.route("/")
+@dns_vis.route("/")
 def index() -> Response:
-    return render_template("dns.html", title="DNS")
+    return render_template("dns_vis.html", title="DNS visualizer")
 
 
-@dns.route("/query")
+@dns_vis.route("/query")
 def query() -> Response:
     domain_name = request.args.get("name")
 
@@ -22,13 +22,12 @@ def query() -> Response:
     if root_ip is None:
         root_ip = "192.33.4.12"
 
-    node_map = {}
-    referrals = {}
+    service = DNSLookup(root_ip)
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        answer = dns_lookup(DNSNode("root", root_ip), domain_name, node_map, referrals, set(), sock)
+        answer = service.lookup(domain_name, sock)
 
     return asdict(DNSLookupResult(
         answer.ip_addr if answer else None,
-        list(node_map.values()),
-        referrals
+        service.get_connected_nodes(),
+        service.referrals
     ))

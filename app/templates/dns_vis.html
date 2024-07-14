@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    <link rel="stylesheet" href="/static/css/dns.css">
+    <link rel="stylesheet" href="/static/css/dns_vis.css">
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li>DNS</li>
+    <li>DNS visualizer</li>
 {% endblock %}
 
 {% block content %}
-    <p>A DNS name lookup tool.</p>
+    <p>A DNS lookup visualization tool for tracing the node path taken for an iterative query.</p>
     <div>
         <div class="form-param">
             <label>Root server:</label>
@@ -22,6 +22,7 @@
         </div>
     </div>
     <svg><g/></svg>
+    <div id="tooltip"></div>
     <script src="/static/js/runtime.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/static/js/dns.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/dns_vis.js" type="text/javascript" charset="utf-8"></script>
 {% endblock %}

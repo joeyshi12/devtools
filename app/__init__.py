@@ -5,7 +5,7 @@ from flask import Flask, Response, render_template
 from flask_session import Session
 from .webhook import webhook
 from .jdtt import jdtt
-from .dns import dns
+from .dns_vis import dns_vis
 
 
 def create_app() -> Flask:
@@ -17,7 +17,7 @@ def create_app() -> Flask:
 
     app.register_blueprint(webhook, url_prefix="/webhook")
     app.register_blueprint(jdtt, url_prefix="/jdtt")
-    app.register_blueprint(dns, url_prefix="/dns")
+    app.register_blueprint(dns_vis, url_prefix="/dns_vis")
 
     os.makedirs("logs", exist_ok=True)
     logging.basicConfig(
