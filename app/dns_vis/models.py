@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class ResourceRecord:
     name: str
     rtype: int
-    rdata: str
+    rdata: Optional[str]
 
 
 @dataclass
@@ -26,7 +26,14 @@ class DNSNode:
 
 
 @dataclass
+class DNSReferral:
+    source: str
+    target: str
+    query_domain: str
+
+
+@dataclass
 class DNSLookupTrace:
     answer: Optional[str]
     nodes: list[DNSNode]
-    referrals: dict[str, str]
+    referrals: list[DNSReferral]

@@ -10,9 +10,15 @@ export interface DNSNode {
     records: ResourceRecord[];
 }
 
+export interface DNSReferral {
+    source: string;
+    target: string;
+    query_domain: string;
+}
+
 export interface DNSLookupResult {
     answer: string | null;
     nodes: DNSNode[];
-    referrals: Record<string, string[]>;
+    referrals: DNSReferral[];
 }
 

@@ -35,7 +35,8 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
         alert("Invalid domain.");
         return;
     }
-    const graph = new dagreD3.graphlib.Graph().setGraph({});
+    const graph = new dagreD3.graphlib.Graph({ multigraph: true }).setGraph({});
+    graph.graph().marginy = 20;
 
     for (let node of lookupResult.nodes) {
         const graphNode: any = {
@@ -50,19 +51,18 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
             rx: 5,
             ry: 5,
         };
-        if (node.records.some(record => record.rdata === lookupResult.answer)) {
+        if (lookupResult.answer && node.records.some(record => record.rdata === lookupResult.answer)) {
             graphNode.class = "authoritative";
         }
         graph.setNode(node.name, graphNode);
     }
 
-    for (let name in lookupResult.referrals) {
-        for (let targetName of lookupResult.referrals[name]) {
-            graph.setEdge(name, targetName, {});
-        }
+    for (let i = 0; i < lookupResult.referrals.length; i++) {
+        const referral = lookupResult.referrals[i];
+        const edgeId = `${referral.source}_${referral.target}_${referral.query_domain}`;
+        graph.setEdge(referral.source, referral.target, { label: `${referral.query_domain}, ${i}` }, edgeId);
     }
 
-    graph.graph().marginy = 20;
     svg.call(<any>zoom.transform, d3Zoom.zoomIdentity);
 
     // @ts-ignore
@@ -107,7 +107,7 @@ function createRecordTableString(records: ResourceRecord[]): string {
         <tr>
             <td>${record.name}</td>
             <td>${record.rtype}</td>
-            <td>${record.rdata}</td>
+            <td>${record.rdata ?? "----"}</td>
         </tr>
     `);
     return `

@@ -80,7 +80,7 @@ def read_resource_record(buf: bytes, offset: int) -> tuple[ResourceRecord, int]:
     name, offset = read_name(buf, offset)
     rtype, rclass, ttl, rdlength = struct.unpack(">HHiH", buf[offset:offset + 10])
     offset += 10
-    rdata = ""
+    rdata = None
     match rtype:
         case 1:
             assert rdlength == 4
