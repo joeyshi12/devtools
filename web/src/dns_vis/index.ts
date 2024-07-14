@@ -5,7 +5,7 @@ import { DNSLookupResult, ResourceRecord } from './models';
 
 const svg = d3Select.select("svg")
 const inner = d3Select.select("g")
-const zoom = d3Zoom.zoom().on("zoom", (event) => {
+const zoom = d3Zoom.zoom().on("zoom", (event: any) => {
     inner.attr("transform", event.transform);
 });
 svg.call(zoom);
@@ -50,7 +50,7 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
             rx: 5,
             ry: 5,
         };
-        if (node.an_records.some(record => record.rdata === lookupResult.answer)) {
+        if (node.records.some(record => record.rdata === lookupResult.answer)) {
             graphNode.class = "authoritative";
         }
         graph.setNode(node.name, graphNode);
@@ -62,7 +62,8 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
         }
     }
 
-    graph.graph().marginy = 10;
+    graph.graph().marginy = 20;
+    svg.call(<any>zoom.transform, d3Zoom.zoomIdentity);
 
     // @ts-ignore
     const render = new dagreD3.render();
@@ -72,13 +73,10 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
     inner.selectAll("g.node")
         .on("mousemove", (event: MouseEvent, nodeName: string) => {
             const node = nodeMap.get(nodeName);
-            if (!node) {
+            if (!node || node?.records?.length === 0) {
                 return;
             }
-            if (node.an_records.length === 0 && node.ns_records.length === 0) {
-                return;
-            }
-            const tableString = createRecordTableString(node.an_records.concat(node.ns_records));
+            const tableString = createRecordTableString(node.records);
             d3Select.select('#tooltip')
                 .style('display', 'block')
                 .style('left', (event.pageX + 10) + 'px')

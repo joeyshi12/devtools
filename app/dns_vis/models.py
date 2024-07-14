@@ -22,13 +22,11 @@ class DNSQueryResponse:
 class DNSNode:
     name: str
     ip_addr: str
-    an_records: Optional[list[ResourceRecord]] = None
-    ns_records: Optional[list[ResourceRecord]] = None
-    ar_records: Optional[list[ResourceRecord]] = None
+    records: list[ResourceRecord]
 
 
 @dataclass
-class DNSLookupResult:
+class DNSLookupTrace:
     answer: Optional[str]
     nodes: list[DNSNode]
     referrals: dict[str, str]

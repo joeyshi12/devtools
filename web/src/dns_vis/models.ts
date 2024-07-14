@@ -7,9 +7,7 @@ export interface ResourceRecord {
 export interface DNSNode {
     name: string;
     ip_addr: string;
-    an_records: ResourceRecord[] | null;
-    ns_records: ResourceRecord[] | null;
-    ar_records: ResourceRecord[] | null;
+    records: ResourceRecord[];
 }
 
 export interface DNSLookupResult {
