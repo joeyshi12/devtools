@@ -1,69 +1,94 @@
 import socket
 from typing import Optional
 from .dns_query import dns_query
-from .models import DNSNode
+from .models import DNSLookupTrace, DNSReferral, ResourceRecord, DNSNode
 
 ROOT_NAME = "root"
+MAX_INDIRECTIONS = 4
+MAX_REFERRALS = 4
 
 
-class DNSLookup:
-    def __init__(self, root_ip: str):
-        self.node_map = {ROOT_NAME: DNSNode(ROOT_NAME, root_ip)}
-        self.referrals = {}
+def dns_lookup_trace(domain_name: str, root_ip: str, sock: socket.socket) -> DNSLookupTrace:
+    name_to_ip: dict[str, str] = {ROOT_NAME: root_ip}
+    name_to_records: dict[str, list[ResourceRecord]] = {}
+    referrals: list[DNSReferral] = []
 
-    def get_connected_nodes(self) -> list[DNSNode]:
-        node_names = set()
-        for name, targets in self.referrals.items():
-            if name in self.node_map:
-                node_names.add(name)
-            for target in targets:
-                if target in self.node_map:
-                    node_names.add(target)
+    def lookup(curr_name: str, domain_name: str, visited_names: set[str], remaining_indirections: int) -> Optional[str]:
+        """Returns data from any record for the given query"""
+        visited_names.add(curr_name)
+        if remaining_indirections == 0:
+            return None
 
-        return [self.node_map[name] for name in node_names]
+        for record in name_to_records.get(curr_name, []):
+            if record.name == domain_name:
+                return record.rdata
 
-    def lookup(self, domain_name: str, sock: socket.socket) -> Optional[DNSNode]:
-        return self.__lookup(self.node_map[ROOT_NAME], domain_name, set(), sock)
+        response = dns_query(domain_name, name_to_ip[curr_name], sock)
 
-    def __lookup(self,
-                 curr_node: DNSNode,
-                 domain_name: str,
-                 visited_names: set[str],
-                 sock: socket.socket) -> Optional[DNSNode]:
-        visited_names.add(curr_node.name)
-        self.node_map[curr_node.name] = curr_node
-        print(domain_name, curr_node)
-        response = dns_query(domain_name, curr_node.ip_addr, sock)
-        curr_node.an_records = response.an_records
-        curr_node.ns_records = response.ns_records
-        curr_node.ar_records = response.ar_records
+        if curr_name not in name_to_records:
+            name_to_records[curr_name] = []
+
+        name_to_records[curr_name].extend(response.an_records)
+        name_to_records[curr_name].extend(response.ns_records)
+        name_to_records[curr_name].extend(response.ar_records)
 
         for record in response.an_records:
-            self.node_map[record.name] = DNSNode(record.name, record.rdata)
-
-        if len(response.an_records) > 0:
-            return self.node_map[response.an_records[0].name]
+            if record.rdata:
+                name_to_ip[record.name] = record.rdata
+                return record.rdata
 
         for record in response.ar_records:
-            if record.rtype != 1:
-                continue
-            if record.name not in self.node_map:
-                self.node_map[record.name] = DNSNode(record.name, record.rdata)
+            if record.rdata is not None and record.rtype == 1 and record.name not in name_to_ip:
+                name_to_ip[record.name] = record.rdata
+            if record.name == domain_name:
+                return record.rdata
 
-        for record in response.ns_records:
-            if record.rtype != 2:
+        for i, record in enumerate(response.ns_records):
+            if i == MAX_REFERRALS:
+                break
+            if record.rtype != 2 or record.rdata is None:
                 continue
-            ns_node = self.node_map[record.rdata] \
-                if record.rdata in self.node_map \
-                else self.__lookup(self.node_map[ROOT_NAME], record.rdata, set(), sock)
-            if ns_node is None or ns_node.name in visited_names:
+            ns_name = record.rdata
+            ns_addr = name_to_ip[ns_name] \
+                if record.rdata in name_to_ip \
+                else lookup(ROOT_NAME, record.rdata, set(), remaining_indirections - 1)
+            if ns_addr is None or ns_name in visited_names:
                 continue
-            if curr_node.name in self.referrals:
-                self.referrals[curr_node.name].append(ns_node.name)
-            else:
-                self.referrals[curr_node.name] = [ns_node.name]
-            answer = self.__lookup(ns_node, domain_name, visited_names, sock)
+            referrals.append(DNSReferral(curr_name, ns_name, domain_name))
+            answer = lookup(ns_name, domain_name, visited_names, remaining_indirections)
             if answer:
                 return answer
 
         return None
+
+    answer = lookup(ROOT_NAME, domain_name, set(), MAX_INDIRECTIONS)
+    nodes = __to_nodes(domain_name, name_to_ip, name_to_records, referrals)
+    return DNSLookupTrace(answer, nodes, referrals)
+
+
+def __to_nodes(domain_name: str,
+               name_to_ip: dict[str, str],
+               name_to_records: dict[str, list[ResourceRecord]],
+               referrals: list[DNSReferral]) -> list[DNSNode]:
+    names_set = set()
+    for referral in referrals:
+        names_set.add(referral.source)
+        names_set.add(referral.target)
+
+    nodes = []
+    for name in names_set:
+        ip_addr = name_to_ip.get(name)
+        records = name_to_records.get(name)
+        if ip_addr is None or records is None:
+            continue
+        filtered_records = [
+            record for record in records
+            if (record.name in names_set and record.rtype == 1)
+            or (record.rdata in names_set and record.rtype == 2)
+            or record.name == domain_name
+        ]
+        filtered_records.sort(key=lambda record: record.rtype)
+        node = DNSNode(name, ip_addr, filtered_records)
+        nodes.append(node)
+
+    return nodes

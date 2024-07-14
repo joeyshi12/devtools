@@ -13,6 +13,9 @@ svg {
     border: 1px solid;
     margin: 1rem 0;
     max-height: 700px;
+    &:hover {
+        cursor: default;
+    }
     & .node {
         & rect {
             stroke: #333;
@@ -34,6 +37,9 @@ svg {
         stroke: #333;
         fill: #333;
         stroke-width: 1.5px;
+    }
+    & .edgeLabel text {
+        font-size: 12px;
     }
 }
 

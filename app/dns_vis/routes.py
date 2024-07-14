@@ -3,8 +3,7 @@ import logging
 from flask import render_template, Response, request
 from dataclasses import asdict
 from . import dns_vis
-from .models import DNSLookupResult
-from .dns_lookup import DNSLookup
+from .dns_lookup import dns_lookup_trace
 
 logger = logging.getLogger("waitress")
 
@@ -22,12 +21,11 @@ def query() -> Response:
     if root_ip is None:
         root_ip = "192.33.4.12"
 
-    service = DNSLookup(root_ip)
+    trace = None
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        answer = service.lookup(domain_name, sock)
+        trace = dns_lookup_trace(domain_name, root_ip, sock)
 
-    return asdict(DNSLookupResult(
-        answer.ip_addr if answer else None,
-        service.get_connected_nodes(),
-        service.referrals
-    ))
+    if trace is None:
+        return "Record not found", 400
+
+    return asdict(trace)
