@@ -57,7 +57,7 @@ function renderLookupGraph(lookupResult: DNSLookupResult): void {
             d3Select.select("#tooltip")
                 .style("display", "block")
                 .style("left", `${event.pageX + 10}px`)
-                .style("top", `${event.pageY - 5}px`);
+                .style("top", `${event.pageY}px`);
         })
         .on("mouseleave", () => {
             d3Select.select("#tooltip").style("display", "none");
