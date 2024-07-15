@@ -17,8 +17,12 @@ document.getElementById("lookup-button").addEventListener("click", async () => {
         alert("Missing domain.");
         return;
     }
-    const lookupResult = await fetchLookupResult(domain);
-    renderLookupGraph(lookupResult);
+    try {
+        const lookupResult = await fetchLookupResult(domain);
+        renderLookupGraph(lookupResult);
+    } catch (e) {
+        alert(`Failed to lookup ${domain}.`);
+    }
 });
 
 async function fetchLookupResult(domain: string) {
