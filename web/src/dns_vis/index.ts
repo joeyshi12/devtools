@@ -72,10 +72,10 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
                 return;
             }
             const tableString = createRecordTableString(node.records);
-            d3Select.select('#tooltip')
-                .style('display', 'block')
-                .style('left', (event.pageX + 10) + 'px')
-                .style('top', (event.pageY + 10) + 'px')
+            d3Select.select("#tooltip")
+                .style("display", "block")
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY + 10}px`)
                 .html(tableString);
         })
         .on("mouseleave", () => {
