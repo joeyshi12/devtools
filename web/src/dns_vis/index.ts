@@ -8,6 +8,7 @@ const inner = d3Select.select("g")
 const zoom = d3Zoom.zoom().on("zoom", (event: any) => {
     inner.attr("transform", event.transform);
 });
+
 svg.call(zoom);
 
 document.getElementById("lookup-button").addEventListener("click", async () => {
@@ -17,7 +18,7 @@ document.getElementById("lookup-button").addEventListener("click", async () => {
         return;
     }
     const lookupResult = await fetchLookupResult(domain);
-    renderDnsGraph(lookupResult);
+    renderLookupGraph(lookupResult);
 });
 
 async function fetchLookupResult(domain: string) {
@@ -26,27 +27,62 @@ async function fetchLookupResult(domain: string) {
     return await response.json();
 }
 
-function renderDnsGraph(lookupResult: DNSLookupResult) {
+function renderLookupGraph(lookupResult: DNSLookupResult): void {
     if (lookupResult.nodes.length === 0) {
         alert("Invalid domain.");
         return;
     }
+
+    svg.call(<any>zoom.transform, d3Zoom.zoomIdentity);
+    const graph = createDagreGraph(lookupResult);
+
+    // @ts-ignore
+    const render = new dagreD3.render();
+    render(inner, graph);
+
+    inner.selectAll("g.node")
+        .on("mouseenter", (event: MouseEvent, nodeName: string) => {
+            const node = lookupResult.nodes.find(node => node.name === nodeName);
+            if (!node || node?.records?.length === 0) {
+                return;
+            }
+            const tableElement: HTMLTableElement = createRecordTable(node.records);
+            d3Select.select("#tooltip")
+                .style("display", "block")
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY}px`)
+                .html(tableElement.outerHTML);
+        })
+        .on("mousemove", (event: MouseEvent) => {
+            d3Select.select("#tooltip")
+                .style("display", "block")
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY - 5}px`);
+        })
+        .on("mouseleave", () => {
+            d3Select.select("#tooltip").style("display", "none");
+        })
+        .on("mousedown", () => {
+            d3Select.select("#tooltip").style("display", "none");
+        });
+
+    const svgBox = (svg.node() as SVGSVGElement).getBoundingClientRect();
+    const groupBox = (inner.node() as SVGGElement).getBoundingClientRect();
+    const translateX = (svgBox.width - groupBox.width) / 2;
+    const transform = d3Zoom.zoomIdentity.translate(translateX, 0);
+    svg.call(<any>zoom.transform, transform);
+}
+
+function createDagreGraph(lookupResult: DNSLookupResult): dagreD3.graphlib.Graph {
     const graph = new dagreD3.graphlib.Graph({ multigraph: true }).setGraph({});
     graph.graph().marginy = 20;
 
     for (let node of lookupResult.nodes) {
-        const graphNode: any = {
-            label: () => {
-                const div = document.createElement("div");
-                div.innerHTML = `
-                    <label>${node.name}</label>
-                    <p>${node.ip_addr}</p>
-                `;
-                return div;
-            },
-            rx: 5,
-            ry: 5,
-        };
+        const nodeHtml = document.createElement("div")
+        const selection = d3Select.select(nodeHtml);
+        selection.append("label").text(node.name);
+        selection.append("p").text(node.ip_addr);
+        const graphNode: any = { label: nodeHtml, rx: 5, ry: 5 };
         if (lookupResult.answer && node.records.some(record => record.rdata === lookupResult.answer)) {
             graphNode.class = "authoritative";
         }
@@ -58,38 +94,7 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
         graph.setEdge(referral.source, referral.target, { label: `${referral.query_domain}, ${i}` }, i.toString());
     }
 
-    svg.call(<any>zoom.transform, d3Zoom.zoomIdentity);
-
-    // @ts-ignore
-    const render = new dagreD3.render();
-    render(inner, graph);
-
-    const nodeMap = new Map(lookupResult.nodes.map(node => [node.name, node]));
-    inner.selectAll("g.node")
-        .on("mousemove", (event: MouseEvent, nodeName: string) => {
-            const node = nodeMap.get(nodeName);
-            if (!node || node?.records?.length === 0) {
-                return;
-            }
-            const tableString = createRecordTableString(node.records);
-            d3Select.select("#tooltip")
-                .style("display", "block")
-                .style("left", `${event.pageX + 10}px`)
-                .style("top", `${event.pageY + 10}px`)
-                .html(tableString);
-        })
-        .on("mouseleave", () => {
-            d3Select.select("#tooltip").style("display", "none");
-        })
-        .on("mousedown", () => {
-            d3Select.select("#tooltip").style("display", "none");
-        });
-
-    const svgBox = (svg.node() as SVGSVGElement).getBoundingClientRect();
-    const groupBox = (inner.node() as SVGGElement).getBoundingClientRect();
-    const x = (svgBox.width - groupBox.width) / 2;
-    const transform = d3Zoom.zoomIdentity.translate(x, 0);
-    svg.call(<any>zoom.transform, transform);
+    return graph;
 }
 
 function getInputValue(id: string): string {
@@ -97,30 +102,26 @@ function getInputValue(id: string): string {
     return textInput.value;
 }
 
-function createRecordTableString(records: ResourceRecord[]): string {
-    const rows = records.map((record: ResourceRecord) => `
-        <tr>
-            <td>${record.name}</td>
-            <td>${record.rtype}</td>
-            <td>${record.rdata ?? "----"}</td>
-        </tr>
-    `);
-    return `
-        <table>
-            <thead>
-                <tr>
-                    <td>Name</td>
-                    <td>Type</td>
-                    <td>Data</td>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows.join("")}
-            </tbody>
-        </table>
-    `;
+function createRecordTable(records: ResourceRecord[]): HTMLTableElement {
+    const table = document.createElement("table");
+    const tableSelection = d3Select.select(table);
+
+    const headRow = tableSelection.append("thead").append("tr");
+    headRow.append("td").text("Name");
+    headRow.append("td").text("Type");
+    headRow.append("td").text("Data");
+
+    const tableBody = tableSelection.append("tbody");
+    for (let record of records) {
+        const row = tableBody.append("tr");
+        row.append("td").text(record.name);
+        row.append("td").text(record.rtype);
+        row.append("td").text(record.rdata);
+    }
+
+    return table;
 }
 
-fetchLookupResult("www.example.com").then((lookupResult: any) => {
-    renderDnsGraph(lookupResult);
+fetchLookupResult("www.example.com").then((lookupResult: DNSLookupResult) => {
+    renderLookupGraph(lookupResult);
 });

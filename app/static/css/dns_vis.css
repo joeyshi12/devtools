@@ -48,7 +48,5 @@ svg {
     position: absolute;
     background: #fff;
     box-shadow: 2px 2px 3px 0 rgb(92 92 92 / 0.5);
-    border: 1px solid #ddd;
     font-size: 14px;
-    padding: 8px 8px;
 }
