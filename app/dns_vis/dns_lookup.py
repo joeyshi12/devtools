@@ -55,7 +55,6 @@ def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
                 else lookup(ROOT_NAME, record.rdata, set(), remaining_indirections - 1)
             if ns_addr is None or ns_name in visited_names:
                 continue
-            name_to_data[ns_name] = ns_addr
             referrals.append(DNSReferral(curr_name, ns_name, domain_name))
             answer = lookup(ns_name, domain_name, visited_names, remaining_indirections)
             if answer:
