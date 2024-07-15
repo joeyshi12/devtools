@@ -3,13 +3,14 @@ from typing import Optional
 from .dns_query import dns_query
 from .models import DNSLookupTrace, DNSReferral, ResourceRecord, DNSNode
 
-ROOT_NAME = "root"
+ROOT_NAME = "c.root-servers.net"
+ROOT_IP = "192.33.4.12"
 MAX_INDIRECTIONS = 4
 MAX_REFERRALS = 4
 
 
-def dns_lookup_trace(domain_name: str, root_ip: str, sock: socket.socket) -> DNSLookupTrace:
-    name_to_ip: dict[str, str] = {ROOT_NAME: root_ip}
+def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
+    name_to_ip: dict[str, str] = {ROOT_NAME: ROOT_IP}
     name_to_records: dict[str, list[ResourceRecord]] = {}
     referrals: list[DNSReferral] = []
 

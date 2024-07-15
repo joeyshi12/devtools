@@ -12,20 +12,16 @@ svg.call(zoom);
 
 document.getElementById("lookup-button").addEventListener("click", async () => {
     const domain = getInputValue("domain");
-    const rootServer = getInputValue("root-server");
-    if (!domain || domain.length === 0) {
+    if (!domain) {
         alert("Missing domain.");
         return;
     }
-    const lookupResult = await fetchLookupResult(domain, rootServer);
+    const lookupResult = await fetchLookupResult(domain);
     renderDnsGraph(lookupResult);
 });
 
-async function fetchLookupResult(domain: string, rootServer?: string) {
+async function fetchLookupResult(domain: string) {
     let uri = `/dns_vis/query?name=${domain}`;
-    if (rootServer && rootServer.length > 0) {
-        uri = uri + `&root=${rootServer}`;
-    }
     const response = await fetch(uri);
     return await response.json();
 }
@@ -59,8 +55,7 @@ function renderDnsGraph(lookupResult: DNSLookupResult) {
 
     for (let i = 0; i < lookupResult.referrals.length; i++) {
         const referral = lookupResult.referrals[i];
-        const edgeId = `${referral.source}_${referral.target}_${referral.query_domain}`;
-        graph.setEdge(referral.source, referral.target, { label: `${referral.query_domain}, ${i}` }, edgeId);
+        graph.setEdge(referral.source, referral.target, { label: `${referral.query_domain}, ${i}` }, i.toString());
     }
 
     svg.call(<any>zoom.transform, d3Zoom.zoomIdentity);

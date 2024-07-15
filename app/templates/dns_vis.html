@@ -9,17 +9,11 @@
 {% endblock %}
 
 {% block content %}
-    <p>A DNS lookup visualization tool for tracing the node path taken for an iterative query.</p>
-    <div>
-        <div class="form-param">
-            <label>Root server:</label>
-            <input id="root-server" type="text" placeholder="192.33.4.12" />
-        </div>
-        <div class="form-param">
-            <label>Domain:</label>
-            <input id="domain" type="text" />
-            <button id="lookup-button">Lookup</button>
-        </div>
+    <p>A DNS lookup visualization tool for tracing the search path for an iterative query.</p>
+    <div class="form-param">
+        <label>Domain:</label>
+        <input id="domain" type="text" />
+        <button id="lookup-button">Lookup</button>
     </div>
     <svg><g/></svg>
     <div id="tooltip"></div>
