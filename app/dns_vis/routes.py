@@ -17,11 +17,15 @@ def index() -> Response:
 def query() -> Response:
     domain_name = request.args.get("name")
 
-    trace = None
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        trace = dns_lookup_trace(domain_name, sock)
+    try:
+        logger.info(f"Starting domain lookup for {domain_name}")
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            trace = dns_lookup_trace(domain_name, sock)
 
-    if trace is None:
-        return "Record not found", 400
+        logger.info(f"Finished domain lookup for {domain_name} [answer={trace.answer}]")
+        return asdict(trace)
+    except Exception as e:
+        message = f"Unexpected error occurred while looking up domain {domain_name}"
+        logger.error(message, e)
+        return message, 500
 
-    return asdict(trace)
