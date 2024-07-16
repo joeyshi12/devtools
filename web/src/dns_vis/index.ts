@@ -18,8 +18,11 @@ document.getElementById("lookup-button").addEventListener("click", async () => {
         return;
     }
     try {
+        const lookupButton = <HTMLButtonElement>document.getElementById("lookup-button");
+        lookupButton.disabled = true;
         const lookupResult = await fetchLookupResult(domain);
         renderLookupGraph(lookupResult);
+        lookupButton.disabled = false;
     } catch (e) {
         alert(`Failed to lookup ${domain}.`);
     }

@@ -1,4 +1,5 @@
 import socket
+import logging
 from typing import Optional
 from .dns_query import dns_query
 from .models import DNSLookupTrace, DNSReferral, ResourceRecord, DNSNode
@@ -7,6 +8,8 @@ ROOT_NAME = "c.root-servers.net"
 ROOT_IP = "192.33.4.12"
 MAX_INDIRECTIONS = 4
 MAX_REFERRALS = 4
+
+logger = logging.getLogger("waitress")
 
 
 def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
@@ -63,7 +66,9 @@ def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
 
         return None
 
+    logger.info(f"Looking up domain {domain_name}")
     answer = lookup(ROOT_NAME, domain_name, set(), MAX_INDIRECTIONS)
+    logger.info(f"Found answer {answer} for domain {domain_name}")
     nodes = __to_nodes(domain_name, name_to_ip, name_to_records, referrals)
     return DNSLookupTrace(answer, nodes, referrals)
 
