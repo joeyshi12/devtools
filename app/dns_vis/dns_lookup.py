@@ -10,7 +10,7 @@ MAX_REFERRALS = 4
 
 
 def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
-    name_to_data: dict[str, str] = {ROOT_NAME: ROOT_IP}
+    name_to_ip: dict[str, str] = {ROOT_NAME: ROOT_IP}
     name_to_records: dict[str, list[ResourceRecord]] = {}
     referrals: list[DNSReferral] = []
 
@@ -24,7 +24,7 @@ def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
             if record.name == domain_name:
                 return record.rdata
 
-        response = dns_query(domain_name, name_to_data[curr_name], sock)
+        response = dns_query(domain_name, name_to_ip[curr_name], sock)
 
         if curr_name not in name_to_records:
             name_to_records[curr_name] = []
@@ -35,12 +35,13 @@ def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
 
         for record in response.an_records:
             if record.rdata:
-                name_to_data[record.name] = record.rdata
+                if record.rtype == 1:
+                    name_to_ip[record.name] = record.rdata
                 return record.rdata
 
         for record in response.ar_records:
-            if record.rdata is not None and record.rtype == 1 and record.name not in name_to_data:
-                name_to_data[record.name] = record.rdata
+            if record.rdata is not None and record.rtype == 1 and record.name not in name_to_ip:
+                name_to_ip[record.name] = record.rdata
                 if record.name == domain_name:
                     return record.rdata
 
@@ -50,8 +51,8 @@ def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
             if record.rtype != 2 or record.rdata is None:
                 continue
             ns_name = record.rdata
-            ns_addr = name_to_data[ns_name] \
-                if record.rdata in name_to_data \
+            ns_addr = name_to_ip[ns_name] \
+                if record.rdata in name_to_ip \
                 else lookup(ROOT_NAME, record.rdata, set(), remaining_indirections - 1)
             if ns_addr is None or ns_name in visited_names:
                 continue
@@ -63,7 +64,7 @@ def dns_lookup_trace(domain_name: str, sock: socket.socket) -> DNSLookupTrace:
         return None
 
     answer = lookup(ROOT_NAME, domain_name, set(), MAX_INDIRECTIONS)
-    nodes = __to_nodes(domain_name, name_to_data, name_to_records, referrals)
+    nodes = __to_nodes(domain_name, name_to_ip, name_to_records, referrals)
     return DNSLookupTrace(answer, nodes, referrals)
 
 
