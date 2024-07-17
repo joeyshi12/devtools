@@ -20,6 +20,7 @@ def query() -> Response:
     try:
         logger.info(f"Starting domain lookup for {domain_name}")
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.settimeout(1)
             trace = dns_lookup_trace(domain_name, sock)
 
         logger.info(f"Finished domain lookup for {domain_name} [answer={trace.answer}]")
