@@ -10,12 +10,12 @@ logger = logging.getLogger("waitress")
 
 
 @jdtt.route("/")
-def index() -> Response:
+def index():
     return render_template("jdtt.html", title="JSON Data Type Transcompiler")
 
 
 @jdtt.route("/transcompile", methods=["POST"])
-def transcompile_schema() -> Response:
+def transcompile_schema():
     try:
         target_language = request.form["targetLanguage"]
         date_format = _get_date_pattern(request.form["dateFormat"])

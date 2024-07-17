@@ -1,6 +1,6 @@
 import socket
 import logging
-from flask import render_template, Response, request
+from flask import render_template, request
 from dataclasses import asdict
 from . import dns_vis
 from .dns_lookup import dns_lookup_trace
@@ -9,13 +9,17 @@ logger = logging.getLogger("waitress")
 
 
 @dns_vis.route("/")
-def index() -> Response:
+def index():
     return render_template("dns_vis.html", title="DNS visualizer")
 
 
 @dns_vis.route("/query")
-def query() -> Response:
+def query():
     domain_name = request.args.get("name")
+    if domain_name is None:
+        message = "Domain name is missing from query parameters"
+        logger.error(message)
+        return message, 400
 
     try:
         logger.info(f"Starting domain lookup for {domain_name}")
@@ -27,6 +31,6 @@ def query() -> Response:
         return asdict(trace)
     except Exception as e:
         message = f"Unexpected error occurred while looking up domain {domain_name}"
-        logger.error(f"{message}: {e}")
+        logger.error("%s: %s", message, e)
         return message, 500
 

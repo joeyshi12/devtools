@@ -12,21 +12,21 @@ logger = logging.getLogger("waitress")
 
 
 @webhook.route("/")
-def index() -> Response:
+def index():
     if WEBHOOK_SESSION_ID_KEY not in session or not webhook_history_exists(session[WEBHOOK_SESSION_ID_KEY]):
         session[WEBHOOK_SESSION_ID_KEY] = create_request_history()
     return redirect(f"/webhook/{session[WEBHOOK_SESSION_ID_KEY]}")
 
 
 @webhook.route("/<webhook_id>")
-def webhook_history(webhook_id: str) -> Response:
+def webhook_history(webhook_id: str):
     captures = get_request_captures(webhook_id)
     return Response(render_template("webhook.html", title="Webhook Tester", webhook_id=webhook_id, history=captures))
 
 
 @webhook.route("/<webhook_id>/capture", methods=HTTP_METHODS)
-def capture_request(webhook_id: str) -> Response:
-    capture = db.RequestCapture(
+def capture_request(webhook_id: str):
+    capture = RequestCapture(
         request.url,
         request.method,
         request.data.decode(),
@@ -50,7 +50,7 @@ def capture_request(webhook_id: str) -> Response:
 
 
 @webhook.route("/<webhook_id>", methods=["DELETE"])
-def delete_history(webhook_id: str) -> Response:
+def delete_history(webhook_id: str):
     delete_request_captures(webhook_id)
     return Response(status=204)
 
