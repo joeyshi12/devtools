@@ -1,5 +1,6 @@
 import datetime
 import logging
+from dataclasses import asdict
 from flask import render_template, Response, request, session, redirect
 from . import webhook
 from .database import *
@@ -21,7 +22,7 @@ def index():
 @webhook.route("/<webhook_id>")
 def webhook_history(webhook_id: str):
     captures = get_request_captures(webhook_id)
-    return Response(render_template("webhook.html", title="Webhook Tester", webhook_id=webhook_id, history=captures))
+    return render_template("webhook.html", title="Webhook Tester", webhook_id=webhook_id, history=captures)
 
 
 @webhook.route("/<webhook_id>/capture", methods=HTTP_METHODS)
@@ -43,10 +44,10 @@ def capture_request(webhook_id: str):
     try:
         insert_request_capture(webhook_id, capture)
         logger.info("Captured request [method=%s] [url=%s]", capture.method, capture.url)
-        return capture
+        return asdict(capture)
     except Exception as e:
         logger.error("Failed to capture request: %s", e)
-        return Response("Failed to capture request", status=500, mimetype="text/plain")
+        return "Failed to capture request", 500
 
 
 @webhook.route("/<webhook_id>", methods=["DELETE"])
