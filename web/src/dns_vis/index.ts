@@ -11,20 +11,27 @@ const zoom = d3Zoom.zoom().on("zoom", (event: any) => {
 
 svg.call(zoom);
 
-document.getElementById("lookup-button").addEventListener("click", async () => {
-    const domain = getInputValue("domain");
+const domainInput = <HTMLInputElement>document.getElementById("domain");
+const lookupButton = <HTMLButtonElement>document.getElementById("lookup-button");
+
+fetchLookupResult("www.example.com").then((lookupResult: DNSLookupResult) => {
+    renderLookupGraph(lookupResult);
+});
+
+lookupButton.addEventListener("click", async () => {
+    const domain = domainInput.value;
     if (!domain) {
         alert("Missing domain.");
         return;
     }
     try {
-        const lookupButton = <HTMLButtonElement>document.getElementById("lookup-button");
         lookupButton.disabled = true;
         const lookupResult = await fetchLookupResult(domain);
         renderLookupGraph(lookupResult);
-        lookupButton.disabled = false;
     } catch (e) {
         alert(`Failed to lookup ${domain}.`);
+    } finally {
+        lookupButton.disabled = false;
     }
 });
 
@@ -73,8 +80,8 @@ function renderLookupGraph(lookupResult: DNSLookupResult): void {
             d3Select.select("#tooltip").style("display", "none");
         });
 
-    const svgBox = (svg.node() as SVGSVGElement).getBoundingClientRect();
-    const groupBox = (inner.node() as SVGGElement).getBoundingClientRect();
+    const svgBox = (<SVGSVGElement>svg.node()).getBoundingClientRect();
+    const groupBox = (<SVGGElement>inner.node()).getBoundingClientRect();
     const translateX = (svgBox.width - groupBox.width) / 2;
     const transform = d3Zoom.zoomIdentity.translate(translateX, 0);
     svg.call(<any>zoom.transform, transform);
@@ -104,11 +111,6 @@ function createDagreGraph(lookupResult: DNSLookupResult): dagreD3.graphlib.Graph
     return graph;
 }
 
-function getInputValue(id: string): string {
-    const textInput = <HTMLInputElement>document.getElementById(id);
-    return textInput.value;
-}
-
 function createRecordTable(records: ResourceRecord[]): HTMLTableElement {
     const table = document.createElement("table");
     const tableSelection = d3Select.select(table);
@@ -128,7 +130,3 @@ function createRecordTable(records: ResourceRecord[]): HTMLTableElement {
 
     return table;
 }
-
-fetchLookupResult("www.example.com").then((lookupResult: DNSLookupResult) => {
-    renderLookupGraph(lookupResult);
-});

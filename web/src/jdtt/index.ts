@@ -5,6 +5,8 @@ const editor = ace.edit("editor");
 editor.session.setMode("ace/mode/json");
 
 const formElement = <HTMLFormElement>document.getElementById("jdtt-form");
+const jsonInput = <HTMLInputElement>document.getElementById("json-input");
+
 formElement.addEventListener("submit", (event) => {
     event.preventDefault();
     let jsonInputString: string;
@@ -14,7 +16,6 @@ formElement.addEventListener("submit", (event) => {
         alert("Invalid JSON object entered");
         return;
     }
-    const jsonInput = <HTMLInputElement>document.getElementById("json-input");
     jsonInput.value = jsonInputString;
     formElement.submit();
 });
