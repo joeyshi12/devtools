@@ -45,9 +45,11 @@
     </ul>
     <script>
         document.getElementById("clear-captures-button").onclick = () => {
-            fetch("/webhook/{{webhook_id}}", { method: "DELETE" }).then(() => {
-                window.location.href = "/webhook"
-            });
+            if (confirm("Are you sure you want to clear your capture history?")) {
+                fetch("/webhook/{{webhook_id}}", { method: "DELETE" }).then(() => {
+                    window.location.href = "/webhook"
+                });
+            }
         };
     </script>
 {% endblock %}
