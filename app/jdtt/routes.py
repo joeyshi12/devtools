@@ -27,15 +27,15 @@ def transcompile_schema():
         return Response(result, 200, mimetype="utf-8")
     except json.decoder.JSONDecodeError as e:
         message = f"Invalid JSON object: {e}"
-        logger.error(message)
+        logger.exception(message)
         return Response(message, 400, mimetype="utf-8")
     except JDTTException as e:
         message = f"jdtt: {e}"
-        logger.error(message)
+        logger.exception(message)
         return Response(message, 500, mimetype="utf-8")
     except Exception as e:
         message = "Failed to transcompile JSON object"
-        logger.error("%s: %s", message, e)
+        logger.exception(message)
         return Response(message, 500, mimetype="utf-8")
 
 

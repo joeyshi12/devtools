@@ -45,8 +45,9 @@ def capture_request(webhook_id: str):
         insert_request_capture(webhook_id, capture)
         logger.info("Captured request [method=%s] [url=%s]", capture.method, capture.url)
         return asdict(capture)
-    except Exception as e:
-        logger.error("Failed to capture request: %s", e)
+    except Exception:
+        message = "Failed to capture request"
+        logger.exception(message)
         return "Failed to capture request", 500
 
 

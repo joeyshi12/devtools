@@ -29,8 +29,8 @@ def query():
 
         logger.info(f"Finished domain lookup for {domain_name} [answer={trace.answer}]")
         return asdict(trace)
-    except Exception as e:
+    except Exception:
         message = f"Unexpected error occurred while looking up domain {domain_name}"
-        logger.error("%s: %s", message, e)
+        logger.exception(message)
         return message, 500
 
