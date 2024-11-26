@@ -46,10 +46,10 @@ function _isSatisfied(row: object, whereCondition: WhereCondition): boolean {
             return row[gte.key] >= gte.value;
         case "lt":
             const { lt } = whereCondition as LessThanCondition;
-            return row[lt.key] >= lt.value;
+            return row[lt.key] < lt.value;
         case "lte":
             const { lte } = whereCondition as LessThanOrEqualCondition;
-            return row[lte.key] >= lte.value;
+            return row[lte.key] <= lte.value;
         case "eq":
             const { eq } = whereCondition as EqualCondition;
             return row[eq.key] === eq.value;
