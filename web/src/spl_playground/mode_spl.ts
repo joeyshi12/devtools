@@ -1,12 +1,12 @@
 import "ace-builds/src-min-noconflict/ace";
 
-class PqlHighlightRules extends ace.require("ace/mode/text_highlight_rules").TextHighlightRules {
+class SPLHighlightRules extends ace.require("ace/mode/text_highlight_rules").TextHighlightRules {
     constructor() {
         super();
         const keywordMapper = this.createKeywordMapper({
             "support.function": "bar|line|scatter|min|max|avg|count|sum",
             "constant.language": "null",
-            "keyword": "plot|as|where|groupby|limit|offset|and|or"
+            "keyword": "plot|as|select|where|groupby|limit|offset|and|or"
         }, "identifier", true);
         this.$rules = {
             "start": [
@@ -40,9 +40,9 @@ class PqlHighlightRules extends ace.require("ace/mode/text_highlight_rules").Tex
     }
 }
 
-export class PqlEditorMode extends ace.require("ace/mode/text").Mode {
+export class SPLEditorMode extends ace.require("ace/mode/text").Mode {
     constructor() {
         super();
-        this.HighlightRules = PqlHighlightRules;
+        this.HighlightRules = SPLHighlightRules;
     }
 }

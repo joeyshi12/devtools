@@ -1,11 +1,12 @@
 import * as d3Dsv from "d3-dsv";
-import { PQLStatement, RowData } from "pql-parser";
-import { PqlEditorMode } from "./mode_pql";
+import { SPLEditorMode } from "./mode_spl";
 import "ace-builds/src-min-noconflict/ace";
 import "ace-builds/src-min-noconflict/ext-language_tools";
+import { Lexer, Parser } from "spl-parser";
+import { plotData } from "./splPlotting";
 
 const editor = ace.edit("query-input");
-editor.session.setMode(<any>new PqlEditorMode());
+editor.session.setMode(<any>new SPLEditorMode());
 editor.setOptions({
     enableBasicAutocompletion: true,
     enableSnippets: true,
@@ -19,7 +20,7 @@ editor.commands.addCommand({
     }
 });
 
-let data: RowData[] = [];
+let data: any[] = [];
 
 const csvInputElement = <HTMLInputElement>document.getElementById("csv-input");
 const plotButtonElement = <HTMLButtonElement>document.getElementById("plot-button");
@@ -66,18 +67,14 @@ saveButtonElement.addEventListener("click", () => {
     document.body.removeChild(downloadLink);
 });
 
-function renderPlot(query: string) {
+function renderPlot(queryString: string) {
     if (data.length === 0) {
         alert("No input file provided");
         return;
     }
     try {
-        const statement = PQLStatement.create(query);
-        const svg = statement.execute(data, {
-            containerWidth: 700,
-            containerHeight: 500,
-            margin: { top: 60, right: 40, bottom: 40, left: 120 }
-        });
+        const query = new Parser(new Lexer(queryString)).parse();
+        const svg = plotData(data, query);
         const plotElement = document.createElement("div");
         plotElement.className = "card";
         plotElement.appendChild(svg);

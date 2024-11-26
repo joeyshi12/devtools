@@ -3,7 +3,9 @@ import logging
 from dataclasses import asdict
 from flask import render_template, Response, request, session, redirect
 from . import webhook
-from .database import *
+from .database import RequestCapture, create_request_history, \
+    get_request_captures, delete_request_captures, \
+    insert_request_capture, webhook_history_exists
 
 WEBHOOK_SESSION_ID_KEY = "webhook_id"
 MAX_HIST_SIZE = 20
@@ -30,7 +32,7 @@ def capture_request(webhook_id: str):
     capture = RequestCapture(
         request.url,
         request.method,
-        request.data.decode(),
+        __get_request_data(),
         dict(request.headers),
         datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     )
@@ -56,3 +58,8 @@ def delete_history(webhook_id: str):
     delete_request_captures(webhook_id)
     return Response(status=204)
 
+
+def __get_request_data() -> str:
+    if len(request.form) > 0:
+        return ", ".join(f"{key}={value}" for key, value in request.form.items())
+    return request.data.decode()

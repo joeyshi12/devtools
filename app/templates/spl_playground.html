@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    <link rel="stylesheet" href="/static/css/csv_vis.css">
+    <link rel="stylesheet" href="/static/css/spl_playground.css">
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li>CSV visualizer</li>
+    <li>SPL playground</li>
 {% endblock %}
 
 {% block content %}
     <div class="description">
-        <p>A tool for generating plots from CSV data.</p>
-        <p>Plotting is done by writing a query in a DSL I made: <a href="https://github.com/joeyshi12/pql-parser">Plot Query Language</a>.</p>
+        <p>A tool for generating plots from SQL-like queries.</p>
+        <p>Plotting is done by writing a query in a DSL I made: <a href="https://github.com/joeyshi12/spl-parser">Structured Plotting Language</a>.</p>
     </div>
     <div class="form-param">
         <label>CSV file</label>
@@ -19,7 +19,7 @@
     </div>
     <div id="table-preview"></div>
     <div class="form-param">
-        <label>PQL query</label>
+        <label>SPL query</label>
         <div id="query-input"></div>
         <button id="plot-button">Plot</button>
         <button id="save-button" disabled autocomplete="off">Save</button>
@@ -27,5 +27,5 @@
     <div id="plot-container"></div>
     <script src="/static/js/runtime.js" type="text/javascript" charset="utf-8"></script>
     <script src="/static/js/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/static/js/csv_vis.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/spl_playground.js" type="text/javascript" charset="utf-8"></script>
 {% endblock %}

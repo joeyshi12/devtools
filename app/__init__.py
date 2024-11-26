@@ -34,9 +34,9 @@ def create_app() -> Flask:
     def index() -> Response:
         return render_template("index.html", title="Devtools")
 
-    @app.route("/csv_vis")
+    @app.route("/spl_playground")
     def csv_vis() -> Response:
-        return render_template("csv_vis.html", title="CSV Visualizer")
+        return render_template("spl_playground.html", title="SPL Playground")
 
     @app.errorhandler(404)
     def page_not_found(e: Exception) -> Response:
