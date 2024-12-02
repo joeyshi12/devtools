@@ -6,8 +6,8 @@ export const commonConfig = {
             import: "./src/jdtt",
             dependOn: "ace"
         },
-        "csv_vis": {
-            import: "./src/csv_vis",
+        "pql_compiler": {
+            import: "./src/pql_compiler",
             dependOn: "ace"
         },
         "dns_vis": "./src/dns_vis",

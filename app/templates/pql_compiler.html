@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    <link rel="stylesheet" href="/static/css/csv_vis.css">
+    <link rel="stylesheet" href="/static/css/pql_compiler.css">
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li>CSV visualizer</li>
+    <li>PQL compiler</li>
 {% endblock %}
 
 {% block content %}
     <div class="description">
-        <p>A tool for generating plots from CSV data.</p>
-        <p>Plotting is done by writing a query in a DSL I made: <a href="https://github.com/joeyshi12/pql-parser">Plot Query Language</a>.</p>
+        <p>An online compiler for generating 2D plots by writing SQL-like queries.</p>
+        <p>The query language is a custom DSL I designed: <a href="https://github.com/joeyshi12/pql-parser">Plot Query Language</a>.</p>
     </div>
     <div class="form-param">
         <label>CSV file</label>
         <input id="csv-input" type="file" autocomplete="off">
     </div>
-    <div id="table-preview"></div>
+    <div id="table-preview-container"></div>
     <div class="form-param">
         <label>PQL query</label>
         <div id="query-input"></div>
@@ -27,5 +27,5 @@
     <div id="plot-container"></div>
     <script src="/static/js/runtime.js" type="text/javascript" charset="utf-8"></script>
     <script src="/static/js/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/static/js/csv_vis.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/pql_compiler.js" type="text/javascript" charset="utf-8"></script>
 {% endblock %}

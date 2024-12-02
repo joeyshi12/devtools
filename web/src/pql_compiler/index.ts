@@ -1,8 +1,13 @@
 import * as d3Dsv from "d3-dsv";
-import { PQLStatement, RowData } from "pql-parser";
 import { PqlEditorMode } from "./mode_pql";
 import "ace-builds/src-min-noconflict/ace";
 import "ace-builds/src-min-noconflict/ext-language_tools";
+import { PQLStatement } from "./pqlStatement";
+
+type CSVFile = {
+    name: string;
+    data: d3Dsv.DSVRowArray;
+};
 
 const editor = ace.edit("query-input");
 editor.session.setMode(<any>new PqlEditorMode());
@@ -19,13 +24,12 @@ editor.commands.addCommand({
     }
 });
 
-let data: RowData[] = [];
-
-const csvInputElement = <HTMLInputElement>document.getElementById("csv-input");
-const plotButtonElement = <HTMLButtonElement>document.getElementById("plot-button");
-const saveButtonElement = <HTMLButtonElement>document.getElementById("save-button");
-const tablePreviewElement = <HTMLDivElement>document.getElementById("table-preview");
-const plotContainerElement = <HTMLDivElement>document.getElementById("plot-container");
+let csvFile: CSVFile = undefined;
+const csvInputElement = <HTMLInputElement>document.querySelector("#csv-input");
+const plotButtonElement = <HTMLButtonElement>document.querySelector("#plot-button");
+const saveButtonElement = <HTMLButtonElement>document.querySelector("#save-button");
+const tablePreviewElement = <HTMLDivElement>document.querySelector("#table-preview-container");
+const plotContainerElement = <HTMLDivElement>document.querySelector("#plot-container");
 
 csvInputElement.addEventListener("change", (event: any) => {
     const file = event.target.files[0];
@@ -33,9 +37,12 @@ csvInputElement.addEventListener("change", (event: any) => {
         return;
     }
     const reader = new FileReader();
-    reader.addEventListener("load", (event: any) => {
-        data = d3Dsv.csvParse(event.target.result);
-        if (data.length === 0) {
+    reader.addEventListener("load", (loadEvent: ProgressEvent<FileReader>) => {
+        csvFile = {
+            name: file.name,
+            data: d3Dsv.csvParse(loadEvent.target.result as string)
+        };
+        if (csvFile.data.length === 0) {
             alert(`No rows found in ${file.name}`);
         }
         renderTablePreview(5);
@@ -67,17 +74,12 @@ saveButtonElement.addEventListener("click", () => {
 });
 
 function renderPlot(query: string) {
-    if (data.length === 0) {
+    if (csvFile?.data.length === 0) {
         alert("No input file provided");
         return;
     }
     try {
-        const statement = PQLStatement.create(query);
-        const svg = statement.execute(data, {
-            containerWidth: 700,
-            containerHeight: 500,
-            margin: { top: 60, right: 40, bottom: 40, left: 120 }
-        });
+        const svg = PQLStatement.create(query).execute(csvFile.data);
         const plotElement = document.createElement("div");
         plotElement.className = "card";
         plotElement.appendChild(svg);
@@ -92,37 +94,43 @@ function renderPlot(query: string) {
             saveButtonElement.disabled = false;
         }
     } catch (err) {
+        console.error(err);
         alert(err);
     }
 }
 
 function renderTablePreview(maxLines: number) {
-    if (data.length === 0) {
+    if (csvFile.data.length === 0) {
         tablePreviewElement.textContent = "";
         return;
     }
 
+    const titleElement = document.createElement("h4");
+    titleElement.innerText = "CSV Preview";
+
+    const tableContainer = document.createElement("div");
+    tableContainer.className = "table-preview";
     const tableElement = document.createElement("table");
     const headElement = tableElement.createTHead();
     const headRow = headElement.insertRow();
-    const keys: string[] = Array.from(Object.keys(data[0]));
-    for (let key of keys) {
+    for (let key of csvFile.data.columns) {
         const cellElement = headRow.insertCell();
         cellElement.textContent = key;
     }
 
     const bodyElement = tableElement.createTBody();
-    for (let i = 0; i < Math.min(data.length, maxLines); i++) {
+    for (let i = 0; i < Math.min(csvFile.data.length, maxLines); i++) {
         const rowElement = bodyElement.insertRow();
-        for (let key of keys) {
+        for (let key of csvFile.data.columns) {
             const cellElement = rowElement.insertCell();
-            cellElement.textContent = String(data[i][key]);
+            cellElement.textContent = String(csvFile.data[i][key]);
         }
     }
+    tableContainer.appendChild(tableElement);
 
     if (tablePreviewElement.childNodes.length > 0) {
-        tablePreviewElement.replaceChild(tableElement, tablePreviewElement.childNodes[0]);
-    } else {
-        tablePreviewElement.appendChild(tableElement);
+        tablePreviewElement.innerHTML = "";
     }
+    tablePreviewElement.appendChild(titleElement);
+    tablePreviewElement.appendChild(tableContainer);
 }
