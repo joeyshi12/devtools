@@ -80,7 +80,28 @@ export function barChart(points: [string, number][], config: PlotConfig): SVGSVG
         .attr("y", (p: [string, number]) => yScale(p[0])!)
         .attr("width", (p: [string, number]) => Math.abs(xScale(p[1]) - xScale(0)))
         .attr("height", yScale.bandwidth())
-        .attr("opacity", "0.7");
+        .on("mousemove", (event, d) => {
+            const htmlString: string = `
+                <ul class="tooltip-card">
+                    <li>
+                        <label>Category</label>
+                        <span>${d[0]}</span>
+                    </li>
+                    <li>
+                        <label>Value</label>
+                        <span>${d[1]}</span>
+                    </li>
+                </ul>
+            `;
+            d3Select.select('#tooltip')
+                .style('display', 'block')
+                .style('left', (event.pageX + 5) + 'px')
+                .style('top', (event.pageY + 5) + 'px')
+                .html(htmlString);
+        })
+        .on("mouseleave", () => {
+            d3Select.select('#tooltip').style('display', 'none');
+        });
 
     plotArea.append("g")
         .attr("transform", `translate(${xScale(0)},0)`)
