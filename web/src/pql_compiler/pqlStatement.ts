@@ -91,19 +91,30 @@ class BarPlotStatement extends PQLStatement {
                 groupKey?: string,
                 limitAndOffset?: LimitAndOffset) {
         super(whereCondition, groupKey, limitAndOffset);
-        this._plotConfig = _createPlotConfig(
-            _plotClause.categoriesColumn.identifier,
-            _plotClause.valuesColumn.identifier
-        );
+        this._plotConfig = {
+            containerWidth: 700,
+            containerHeight: 500,
+            margin: {
+                top: 60,
+                right: 60,
+                bottom: 40,
+                left: 100
+            },
+            xLabel: _plotClause.categoriesColumn.identifier,
+            yLabel: _plotClause.valuesColumn.identifier
+        };
     }
 
     protected override _plotRows(rowArray: CellValue[][]): SVGSVGElement {
-        let points: [string, number][] = rowArray
-            .map((row): [string, number] => [String(row[0]), Number(row[1])])
-            .filter(([_, value]: [string, number]) => !isNaN(value))
-            .sort((p1, p2) => p2[1] - p1[1]);
+        let points: [string, number][] = [];
+        for (let row of rowArray) {
+            const value = Number(row[1]);
+            if (!isNaN(value)) {
+                points.push([String(row[0]), value]);
+            }
+        }
         this._validatePoints(points);
-        points = this._sliceRows(points).reverse();
+        points = this._sliceRows(points.sort((p1, p2) => p2[1] - p1[1])).reverse();
         return barChart(points, this._plotConfig);
     }
 
@@ -133,18 +144,30 @@ class PointPlotStatement extends PQLStatement {
                 groupKey?: string,
                 limitAndOffset?: LimitAndOffset) {
         super(whereCondition, groupKey, limitAndOffset);
-        this._plotConfig = _createPlotConfig(
-            _plotClause.xColumn.identifier,
-            _plotClause.yColumn.identifier
-        );
+        this._plotConfig = {
+            containerWidth: 700,
+            containerHeight: 500,
+            margin: {
+                top: 40,
+                right: 40,
+                bottom: 60,
+                left: 80
+            },
+            xLabel: _plotClause.xColumn.identifier,
+            yLabel: _plotClause.yColumn.identifier
+        };
     }
 
     protected override _plotRows(rowArray: CellValue[][]): SVGSVGElement {
-        let points: [number, number][] = rowArray
-            .map((row): [number, number] => [Number(row[0]), Number(row[1])])
-            .filter(([x, y]: [number, number]) => !isNaN(x) && !isNaN(y))
-            .sort((p1, p2) => p1[0] - p2[0]);
-        points = this._sliceRows(points);
+        let points: [number, number][] = [];
+        for (let row of rowArray) {
+            const x = Number(row[0]);
+            const y = Number(row[1]);
+            if (!isNaN(x) && !isNaN(y)) {
+                points.push([x, y]);
+            }
+        }
+        points = this._sliceRows(points.sort((p1, p2) => p1[0] - p2[0]));
         return this._plotClause.plotFunction === "SCATTER"
             ? scatterPlot(points, this._plotConfig)
             : lineChart(points, this._plotConfig);
@@ -250,19 +273,4 @@ function _columnSum(data: d3Dsv.DSVRowString[], column: string) {
         }
     }
     return result
-}
-
-function _createPlotConfig(xLabel: string, yLabel: string): PlotConfig {
-    return {
-        containerWidth: 700,
-        containerHeight: 500,
-        margin: {
-            top: 60,
-            right: 40,
-            bottom: 40,
-            left: 150
-        },
-        xLabel,
-        yLabel
-    };
 }

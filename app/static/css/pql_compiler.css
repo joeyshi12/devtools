@@ -10,13 +10,14 @@
 
 #table-preview-container > .table-preview {
     overflow-x: auto;
+    margin-bottom: 1rem;
 }
 
 #query-input {
     border-style: solid;
     border-width: 1px;
     margin: 0.5rem 0;
-    height: 4rem;
+    height: 5rem;
     resize: vertical;
 }
 
