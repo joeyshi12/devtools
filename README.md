@@ -1,6 +1,6 @@
 # devtools
 
-Custom tools made for software development purposes.
+Custom tools made to aid in software development.
 
 ## Tools
 
