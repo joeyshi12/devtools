@@ -1,14 +1,22 @@
 version: '3.3'
+
 services:
   devtools:
     image: python:3.10
+    hostname: devtools
     command: sh -c "pip3 install -r requirements.txt && waitress-serve --port=2718 --call app:create_app"
     working_dir: /dist
     volumes:
       - ./:/dist
     environment:
-      - DB_HOST=0.0.0.0
-      - DB_USER=devtools_user
+      - DB_HOST=mariadb
+      - DB_USER=devtools
       - DB_PASS=dt1234
       - DB_NAME=devtools
-    network_mode: host
+    networks:
+      - shared-network
+
+# Depend on an existing shared container network
+networks:
+  shared-network:
+    external: true
