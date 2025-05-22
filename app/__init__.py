@@ -1,6 +1,5 @@
 import os
 import logging
-from datetime import datetime
 from flask import Flask, Response, render_template
 from flask_session import Session
 from .webhook import webhook
@@ -19,14 +18,10 @@ def create_app() -> Flask:
     app.register_blueprint(jdtt, url_prefix="/jdtt")
     app.register_blueprint(dns_vis, url_prefix="/dns_vis")
 
-    os.makedirs("logs", exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("logs/{:%Y-%m-%d}.log".format(datetime.now())),
-            logging.StreamHandler()
-        ]
+        handlers=[logging.StreamHandler()]
     )
     logger = logging.getLogger("waitress")
 
