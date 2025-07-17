@@ -28,6 +28,7 @@ jobs:
         run: |
           docker run -d \
             --name devtools \
+            --network stack_default \
             -p "8100:2718" \
             -e DB_HOST=${DB_HOST} \
             -e DB_USER=${DB_USER} \
