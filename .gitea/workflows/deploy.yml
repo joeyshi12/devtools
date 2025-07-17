@@ -16,6 +16,14 @@ jobs:
         run: |
           docker build -t devtools .
 
+      - name: Stop Docker container
+        run: |
+          docker stop devtools || true
+
+      - name: Remove Docker container
+        run: |
+          docker rm devtools || true
+
       - name: Run Docker container
         run: |
           docker run -d \
