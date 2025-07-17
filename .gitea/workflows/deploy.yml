@@ -1,0 +1,28 @@
+name: Deploy Docker Container
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t devtools .
+
+      - name: Run Docker container
+        run: |
+          docker run -d \
+            --container_name devtools \
+            -p "8100:2718" \
+            -e DB_HOST=${DB_HOST} \
+            -e DB_USER=${DB_USER} \
+            -e DB_PASS=${DB_PASS} \
+            -e DB_NAME=${DB_NAME} \
+            devtools
