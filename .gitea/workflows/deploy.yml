@@ -19,7 +19,7 @@ jobs:
       - name: Run Docker container
         run: |
           docker run -d \
-            --container_name devtools \
+            --name devtools \
             -p "8100:2718" \
             -e DB_HOST=${DB_HOST} \
             -e DB_USER=${DB_USER} \
