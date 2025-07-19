@@ -19,7 +19,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t ${APP_NAME}:latest .
-          docker prune -f
+          docker image prune -f
 
       - name: Remove old Docker container
         run: |
