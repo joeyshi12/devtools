@@ -8,30 +8,34 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
+    env:
+      APP_NAME: devtools
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Build Docker image
         run: |
-          docker build -t devtools .
+          docker build -t ${APP_NAME}:latest .
 
       - name: Stop Docker container
         run: |
-          docker stop devtools || true
+          docker stop ${APP_NAME} || true
 
       - name: Remove Docker container
         run: |
-          docker rm devtools || true
+          docker rm ${APP_NAME} || true
 
       - name: Run Docker container
         run: |
           docker run -d \
-            --name devtools \
+            --name ${APP_NAME} \
             --network stack_default \
             -p "8100:2718" \
             -e DB_HOST=${{ secrets.DB_HOST }} \
             -e DB_USER=${{ secrets.DB_USER }} \
             -e DB_PASS=${{ secrets.DB_PASS }} \
             -e DB_NAME=${{ secrets.DB_NAME }} \
-            devtools
+            ${APP_NAME}:latest
