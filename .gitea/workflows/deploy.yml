@@ -30,7 +30,7 @@ jobs:
             --name devtools \
             --network stack_default \
             -p "8100:2718" \
-            -e DB_HOST=${DB_HOST} \
+            -e DB_HOST=172.18.0.8 \
             -e DB_USER=${DB_USER} \
             -e DB_PASS=${DB_PASS} \
             -e DB_NAME=${DB_NAME} \
