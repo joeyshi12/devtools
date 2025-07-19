@@ -1,5 +1,7 @@
 # devtools
 
+![deploy.yml](https://git.joeyshi.xyz/joey/devtools/actions/workflows/deploy.yml/badge.svg)
+
 Custom tools made to aid in software development.
 
 ## Tools
