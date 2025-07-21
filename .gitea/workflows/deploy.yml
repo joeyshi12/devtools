@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     env:
       APP_NAME: devtools
 
@@ -19,18 +19,19 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t ${APP_NAME}:latest .
-          docker image prune -f
 
       - name: Remove old Docker container
         run: |
           docker stop ${APP_NAME} || true
           docker rm ${APP_NAME} || true
+          docker image prune -f
 
       - name: Run Docker container
         run: |
           docker run -d \
             --name ${APP_NAME} \
             --network stack_default \
+            --restart unless-stopped \
             -p "8100:2718" \
             -e DB_HOST=${{ secrets.DB_HOST }} \
             -e DB_USER=${{ secrets.DB_USER }} \
