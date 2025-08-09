@@ -2,7 +2,7 @@ FROM python:3.14.0b1
 
 WORKDIR /dist
 
-COPY app ./app
+COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
