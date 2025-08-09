@@ -16,17 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install and build client
-        run: |
-          cd web
-          npm ci
-          npm run build
-
       - name: Build Docker image
         run: |
           docker build -t ${APP_NAME}:latest .
