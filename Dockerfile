@@ -2,8 +2,8 @@ FROM python:3.14.0b1
 
 WORKDIR /dist
 
-COPY . /dist
+COPY app ./app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["waitress-serve", "--port=2718", "--call", "app:create_app"]
+CMD ["waitress-serve", "--port=8080", "--call", "app:create_app"]
