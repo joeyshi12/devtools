@@ -1,5 +1,5 @@
-from ..base_blueprint import BaseBlueprint
+from .routes import jdtt_blueprint
 
-jdtt = BaseBlueprint("jdtt", __name__)
-
-from . import routes
+__all__ = [
+    "jdtt_blueprint"
+]
