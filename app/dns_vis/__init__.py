@@ -1,5 +1,5 @@
-from ..base_blueprint import BaseBlueprint
+from .routes import dns_vis_blueprint
 
-dns_vis = BaseBlueprint("dns_vis", __name__)
-
-from . import routes
+__all__ = [
+    "dns_vis_blueprint"
+]

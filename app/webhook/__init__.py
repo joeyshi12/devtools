@@ -1,5 +1,5 @@
-from ..base_blueprint import BaseBlueprint
+from .routes import webhook_blueprint
 
-webhook = BaseBlueprint("webhook", __name__)
-
-from . import routes
+__all__ = [
+    "webhook_blueprint"
+]

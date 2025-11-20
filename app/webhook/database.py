@@ -8,7 +8,7 @@ from typing import Optional
 from dataclasses import dataclass
 import mariadb
 
-logger = logging.getLogger("waitress")
+logger = logging.getLogger(__name__)
 db_config = {
     "host": os.getenv("DB_HOST"),
     "port": 3306,
@@ -33,14 +33,12 @@ def get_connection():
     return connection
 
 
-def webhook_history_exists(webhook_id: str):
+def webhook_history_exists(webhook_id: str) -> bool:
     with get_connection() as connection:
         cursor = connection.cursor()
         query = "SELECT EXISTS (SELECT id FROM webhook_history WHERE id = ?)"
         cursor.execute(query, (webhook_id,))
         return bool(cursor.fetchone()[0])
-
-    return False
 
 
 def create_request_history():

@@ -4,17 +4,18 @@ from typing import Optional
 from flask import Response, render_template, request
 from jdtt.transcompilation import transcompile
 from jdtt.exceptions import JDTTException
-from . import jdtt
+from ..base_blueprint import BaseBlueprint
 
-logger = logging.getLogger("waitress")
+jdtt_blueprint = BaseBlueprint("jdtt", __name__)
+logger = logging.getLogger(__name__)
 
 
-@jdtt.route("/")
+@jdtt_blueprint.route("/")
 def index():
     return render_template("jdtt.html", title="JSON Data Type Transcompiler")
 
 
-@jdtt.route("/transcompile", methods=["POST"])
+@jdtt_blueprint.route("/transcompile", methods=["POST"])
 def transcompile_schema():
     try:
         target_language = request.form["targetLanguage"]

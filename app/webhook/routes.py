@@ -2,7 +2,7 @@ import datetime
 import logging
 from dataclasses import asdict
 from flask import render_template, Response, request, session, redirect
-from . import webhook
+from ..base_blueprint import BaseBlueprint
 from .database import webhook_history_exists, create_request_history, \
         get_request_captures, delete_request_captures, \
         insert_request_capture, RequestCapture
@@ -12,17 +12,18 @@ MAX_HIST_SIZE = 20
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE",
                 "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
-logger = logging.getLogger("waitress")
+webhook_blueprint = BaseBlueprint("webhook", __name__)
+logger = logging.getLogger(__name__)
 
 
-@webhook.route("/")
+@webhook_blueprint.route("/")
 def index():
     if WEBHOOK_SESSION_ID_KEY not in session or not webhook_history_exists(session[WEBHOOK_SESSION_ID_KEY]):
         session[WEBHOOK_SESSION_ID_KEY] = create_request_history()
     return redirect(f"/webhook/{session[WEBHOOK_SESSION_ID_KEY]}")
 
 
-@webhook.route("/<webhook_id>")
+@webhook_blueprint.route("/<webhook_id>")
 def webhook_history(webhook_id: str):
     captures = get_request_captures(webhook_id)
     return render_template(
@@ -33,7 +34,7 @@ def webhook_history(webhook_id: str):
     )
 
 
-@webhook.route("/<webhook_id>/capture", methods=HTTP_METHODS)
+@webhook_blueprint.route("/<webhook_id>/capture", methods=HTTP_METHODS)
 def capture_request(webhook_id: str):
     capture = RequestCapture(
         request.url,
@@ -59,7 +60,7 @@ def capture_request(webhook_id: str):
         return "Failed to capture request", 500
 
 
-@webhook.route("/<webhook_id>", methods=["DELETE"])
+@webhook_blueprint.route("/<webhook_id>", methods=["DELETE"])
 def delete_history(webhook_id: str):
     delete_request_captures(webhook_id)
     return Response(status=204)
