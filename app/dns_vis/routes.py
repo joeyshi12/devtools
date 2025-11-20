@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @dns_vis_blueprint.route("/")
 def index():
-    return render_template("dnsvis_blueprint.html", title="DNS visualizer")
+    return render_template("dns_vis.html", title="DNS visualizer")
 
 
 @dns_vis_blueprint.route("/query")
