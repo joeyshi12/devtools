@@ -1,18 +1,34 @@
 # devtools
 
-![deploy.yml](https://git.joeyshi.xyz/joey/devtools/actions/workflows/deploy.yml/badge.svg)
-
 Custom tools made to aid in software development.
-
-> 💡 **Heads up:**  
->
-> If you’re viewing this on GitHub, note that this is just a mirror. The primary repository lives here:
->
-> [git.joeyshi.xyz/joey/pc-builder](https://git.joeyshi.xyz/joey/pc-builder)
 
 ## Tools
 
-- Webhook tester: send a request to `/webhook/<webhook_id>/capture` to capture the request metadata.
-- DNS visualizer: a DNS lookup visualization tool for tracing the search path for an iterative query.
-- JSON data type transcompiler: web interface for [jdtt](https://github.com/joeyshi12/json-data-type-transcompiler).
-- PQL compiler: playground for executing [PQL](https://github.com/joeyshi12/pql-parser) queries.
+### Webhook tester
+
+An intermediary for inspecting request contents.
+This intended to be used for debugging and testing webhooks.
+Send a request to `/webhook/<webhook_id>/capture` to capture your request metadata.
+
+- https://devtools.joeyshi.xyz/webhook
+
+### DNS visualizer
+
+A DNS lookup visualization tool that traces the search path for an iterative query.
+You can inspect the name server hierarchy of any given domain.
+
+- https://devtools.joeyshi.xyz/dns_vis
+
+### JSON data type transcompiler
+
+A web interface for [jdtt](https://github.com/joeyshi12/json-data-type-transcompiler),
+a utility for generating model classes and interfaces from a JSON literal.
+
+- https://devtools.joeyshi.xyz/jdtt
+
+### PQL compiler
+
+An online compiler for [PQL](https://github.com/joeyshi12/pql-parser),
+a query language I made to generate 2D plots from tabular data.
+
+- https://devtools.joeyshi.xyz/pql_compiler
