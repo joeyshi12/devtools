@@ -1,5 +1,7 @@
 # devtools
 
+![docker-image.yml](https://github.com/joeyshi12/devtools/actions/workflows/docker-image.yml/badge.svg)
+
 Custom tools made to aid in software development.
 
 ## Tools
