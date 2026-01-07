@@ -7,6 +7,11 @@ editor.session.setMode("ace/mode/json");
 const formElement = <HTMLFormElement>document.getElementById("jdtt-form");
 const jsonInput = <HTMLInputElement>document.getElementById("json-input");
 
+fetch("/static/json/jdtt_mock.json").then(async (response) => {
+    const mock_data = await response.json()
+    editor.session.setValue(JSON.stringify(mock_data, null, 4));
+});
+
 formElement.addEventListener("submit", (event) => {
     event.preventDefault();
     let jsonInputString: string;

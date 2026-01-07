@@ -11,7 +11,7 @@ type CSVFile = {
 
 const editor = ace.edit("query-input");
 editor.session.setMode(<any>new PqlEditorMode());
-editor.session.setValue("PLOT BAR(gender AS `Gender`, AVG(annual_salary) AS `Average Salary`)\nGROUPBY gender");
+editor.session.setValue("PLOT SCATTER(marketing_spend as `Marketing spend`, units_sold as `Units sold`)\nWHERE product_category = 'Electronics'");
 editor.setOptions({
     enableBasicAutocompletion: true,
     enableSnippets: true,
@@ -33,12 +33,13 @@ const saveButtonElement = <HTMLButtonElement>document.querySelector("#save-butto
 const tablePreviewElement = <HTMLDivElement>document.querySelector("#table-preview-container");
 const plotContainerElement = <HTMLDivElement>document.querySelector("#plot-container");
 
-fetch("/static/csv/mock_data.csv").then(async (response) => {
+fetch("/static/csv/pql_mock.csv").then(async (response) => {
     csvFile = {
-        name: "mock_data.csv",
+        name: "pql_mock.csv",
         data: d3Dsv.csvParse(await response.text())
     };
     renderTablePreview(5);
+    renderPlot(editor.getValue());
 });
 
 csvInputElement.addEventListener("change", (event: any) => {

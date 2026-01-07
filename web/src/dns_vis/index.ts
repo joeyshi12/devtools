@@ -3,6 +3,7 @@ import * as d3Zoom from 'd3-zoom';
 import * as dagreD3 from 'dagre-d3-es';
 import { DNSLookupResult, ResourceRecord } from './models';
 
+const initialDomain = "www.example.com";
 const svg = d3Select.select("svg")
 const inner = d3Select.select("g")
 const zoom = d3Zoom.zoom().on("zoom", (event: any) => {
@@ -12,9 +13,11 @@ const zoom = d3Zoom.zoom().on("zoom", (event: any) => {
 svg.call(zoom);
 
 const domainInput = <HTMLInputElement>document.getElementById("domain");
+domainInput.value = initialDomain;
+
 const lookupButton = <HTMLButtonElement>document.getElementById("lookup-button");
 
-fetchLookupResult("www.example.com").then((lookupResult: DNSLookupResult) => {
+fetchLookupResult(initialDomain).then((lookupResult: DNSLookupResult) => {
     renderLookupGraph(lookupResult);
 });
 

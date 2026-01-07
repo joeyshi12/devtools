@@ -1,0 +1,20 @@
+{
+    "EmployeeId": "955160008184099",
+    "FullName": "Jocob Samual George",
+    "Status": "ACTIVE",
+    "Location": "Terminal Annex, Colorado",
+    "Timeline": {
+        "HireDate": "2016-04-13",
+        "BirthDate": "1990-09-09",
+        "LastUpdated": "2016-04-13T21:42:09Z"
+    },
+    "ContactList": [
+        "samual.george@oracle.com",
+        "+1-581-993-0000"
+    ],
+    "Responsibilities": [
+        "Project Management",
+        "Line Manager Reporting",
+        "Full-time Regular Status"
+    ]
+}
