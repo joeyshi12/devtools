@@ -27,7 +27,7 @@ export function barChart(points: [string, number][], config: PlotConfig): SVGSVG
 
     if (config.xLabel) {
         svg.append("text")
-            .attr("transform", `translate(${config.containerWidth / 2}, 2)`)
+            .attr("transform", `translate(2, ${config.containerHeight / 2}) rotate(-90)`)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "hanging")
             .text(config.xLabel);
@@ -35,7 +35,7 @@ export function barChart(points: [string, number][], config: PlotConfig): SVGSVG
 
     if (config.yLabel) {
         svg.append("text")
-            .attr("transform", `translate(2, ${config.containerHeight / 2}) rotate(-90)`)
+            .attr("transform", `translate(${config.containerWidth / 2}, 2)`)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "hanging")
             .text(config.yLabel);
