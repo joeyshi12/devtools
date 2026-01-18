@@ -1,8 +1,8 @@
 FROM python:3.14.0b1
 
 WORKDIR /dist
-
-COPY . .
+COPY ./app app
+COPY ./requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
