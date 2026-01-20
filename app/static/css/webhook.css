@@ -32,6 +32,7 @@
     text-align: left;
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
     font-size: 12px;
+    text-wrap: auto;
 }
 
 .request-info td:first-child {
