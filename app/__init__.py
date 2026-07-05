@@ -2,6 +2,7 @@ import os
 import logging
 from flask import Flask, Response, render_template
 from flask_session import Session
+from .database import init_db
 from .webhook import webhook_blueprint
 from .jdtt import jdtt_blueprint
 from .dns_vis import dns_vis_blueprint
@@ -20,6 +21,8 @@ def create_app() -> Flask:
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_TYPE"] = "filesystem"
     Session(app)
+
+    init_db()
 
     app.register_blueprint(webhook_blueprint, url_prefix="/webhook")
     app.register_blueprint(jdtt_blueprint, url_prefix="/jdtt")

@@ -1,6 +1,5 @@
 import datetime
 import logging
-from dataclasses import asdict
 from flask import render_template, Response, request, session, redirect
 from ..base_blueprint import BaseBlueprint
 from .database import webhook_history_exists, create_request_history, \
@@ -53,7 +52,7 @@ def capture_request(webhook_id: str):
     try:
         insert_request_capture(webhook_id, capture)
         logger.info("Captured request [method=%s] [url=%s]", capture.method, capture.url)
-        return asdict(capture)
+        return capture.to_dict()
     except Exception:
         message = "Failed to capture request"
         logger.exception(message)
