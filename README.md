@@ -34,3 +34,27 @@ An online compiler for [PQL](https://github.com/joeyshi12/pql-parser),
 a query language I made to generate 2D plots from tabular data.
 
 - https://devtools.joeyshi.xyz/pql_compiler
+
+## Running with Docker Compose
+
+The webhook tester stores its data in a SQLite database file, persisted via a bind mount to `./data`
+so it can be backed up directly from the host.
+
+Create a `docker-compose.yml` with the following content:
+
+```yaml
+services:
+  devtools:
+    image: ghcr.io/joeyshi12/devtools:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+```
+
+Then start it with:
+
+```sh
+docker compose up -d
+```

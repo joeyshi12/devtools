@@ -10,11 +10,13 @@ ENV DB_PATH=/data/db.sqlite3
 VOLUME ["/data"]
 
 # Set owner of app files to non-root user
-RUN addgroup -g 1000 appuser \
+RUN apk add --no-cache su-exec \
+    && addgroup -g 1000 appuser \
     && adduser -D -u 1000 -G appuser -h /home/appuser appuser \
-    && mkdir -p /data \
-    && chown -R appuser:appuser /dist /data
+    && chown -R appuser:appuser /dist
 
-USER appuser
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["waitress-serve", "--port=8080", "--call", "app:create_app"]
