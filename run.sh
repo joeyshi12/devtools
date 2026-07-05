@@ -1,6 +1,3 @@
 #!/bin/sh
-export DB_HOST="0.0.0.0"
-export DB_USER="root"
-export DB_PASS="password"
-export DB_NAME="devtools"
+export DB_PATH="db.sqlite3"
 flask --debug run

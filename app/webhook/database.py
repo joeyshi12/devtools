@@ -1,117 +1,108 @@
-import os
 import re
 import uuid
 import logging
 import json
 import datetime
 from typing import Optional
-from dataclasses import dataclass
-import mariadb
+from sqlalchemy import Text, ForeignKey, select, delete, exists
+from sqlalchemy.orm import Mapped, mapped_column, Session
+from ..database import engine, Base
 
 logger = logging.getLogger(__name__)
-db_config = {
-    "host": os.getenv("DB_HOST"),
-    "port": 3306,
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASS"),
-    "database": os.getenv("DB_NAME")
-}
 
 
-@dataclass
-class RequestCapture:
-    url: str
-    method: str
-    body: str
-    headers: dict[str, str]
-    creation_date: str
+class WebhookHistory(Base):
+    __tablename__ = "webhook_history"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    creation_date: Mapped[str] = mapped_column(Text)
 
 
-def get_connection():
-    connection = mariadb.connect(**db_config)
-    connection.autocommit = False
-    return connection
+class RequestCapture(Base):
+    __tablename__ = "request_capture"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    webhook_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("webhook_history.id", ondelete="CASCADE"), nullable=False
+    )
+    url: Mapped[str] = mapped_column(Text)
+    method: Mapped[str] = mapped_column(Text)
+    body: Mapped[str] = mapped_column(Text)
+    headers_json: Mapped[str] = mapped_column("headers", Text)
+    creation_date: Mapped[str] = mapped_column(Text)
+
+    def __init__(self, url: str, method: str, body: str, headers: dict[str, str], creation_date: str, **kwargs):
+        super().__init__(
+            url=url,
+            method=method,
+            body=body,
+            headers_json=json.dumps(headers),
+            creation_date=creation_date,
+            **kwargs
+        )
+
+    @property
+    def headers(self) -> dict[str, str]:
+        return json.loads(self.headers_json)
+
+    def to_dict(self) -> dict:
+        return {
+            "url": self.url,
+            "method": self.method,
+            "body": self.body,
+            "headers": self.headers,
+            "creation_date": self.creation_date
+        }
 
 
 def webhook_history_exists(webhook_id: str) -> bool:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        query = "SELECT EXISTS (SELECT id FROM webhook_history WHERE id = ?)"
-        cursor.execute(query, (webhook_id,))
-        return bool(cursor.fetchone()[0])
+    with Session(engine) as session:
+        query = select(exists().where(WebhookHistory.id == webhook_id))
+        return bool(session.execute(query).scalar())
 
 
 def create_request_history():
     webhook_id = str(uuid.uuid4())
     creation_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        query = (
-            "INSERT INTO webhook_history "
-            "VALUES (?, ?)"
-        )
-        cursor.execute(query, (webhook_id, creation_date))
-        connection.commit()
+    with Session(engine) as session:
+        session.add(WebhookHistory(id=webhook_id, creation_date=creation_date))
+        session.commit()
 
     return webhook_id
 
 
 def insert_request_capture(webhook_id: str, capture: RequestCapture):
-    with get_connection() as connection:
-        if not is_valid_uuid(webhook_id):
-            raise Exception(f"Invalid webhook ID {webhook_id}")
-        cursor = connection.cursor()
-        query = (
-            "INSERT INTO request_capture "
-            "VALUES (?, ?, ?, ?, ?, ?)"
-        )
-        headers_str = json.dumps(capture.headers)
-        params = (
-            webhook_id,
-            capture.url,
-            capture.method,
-            capture.body,
-            headers_str,
-            capture.creation_date
-        )
-        cursor.execute(query, params)
-        connection.commit()
+    if not is_valid_uuid(webhook_id):
+        raise Exception(f"Invalid webhook ID {webhook_id}")
+    with Session(engine, expire_on_commit=False) as session:
+        capture.webhook_id = webhook_id
+        session.add(capture)
+        session.commit()
 
 
-def get_request_captures(webhook_id: str):
-    captures = []
-    with get_connection() as connection:
-        cursor = connection.cursor()
+def get_request_captures(webhook_id: str) -> list[RequestCapture]:
+    with Session(engine) as session:
         query = (
-            "SELECT webhook_id, url, method, body, headers, creation_date "
-            "FROM request_capture "
-            "WHERE webhook_id = ? "
-            "ORDER BY creation_date"
+            select(RequestCapture)
+            .where(RequestCapture.webhook_id == webhook_id)
+            .order_by(RequestCapture.creation_date)
         )
-        cursor.execute(query, (webhook_id,))
-        for row in cursor.fetchall():
-            _, url, method, body, headers_str, creation_date = row
-            headers = json.loads(headers_str)
-            captures.append(RequestCapture(url, method, body, headers, creation_date))
+        captures = list(session.scalars(query))
+        session.expunge_all()
         logger.info("Read %d request captures for webhook session %s", len(captures), webhook_id)
 
     return captures
 
 
 def delete_request_captures(webhook_id: str, expire_date: Optional[str] = None):
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        query = (
-            "DELETE FROM request_capture "
-            "WHERE webhook_id = ?"
+    with Session(engine) as session:
+        query = delete(RequestCapture).where(
+            RequestCapture.webhook_id == webhook_id
         )
-        if expire_date is None:
-            cursor.execute(query, (webhook_id,))
-        else:
-            query = query + " AND creation_date = ?"
-            cursor.execute(query, (webhook_id, expire_date))
-
-        connection.commit()
+        if expire_date is not None:
+            query = query.where(RequestCapture.creation_date == expire_date)
+        session.execute(query)
+        session.commit()
 
 
 def is_valid_uuid(uuid_str: str):
