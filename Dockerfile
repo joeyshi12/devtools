@@ -10,8 +10,8 @@ ENV DB_PATH=/data/db.sqlite3
 VOLUME ["/data"]
 
 # Set owner of app files to non-root user
-RUN groupadd --gid 1000 appuser \
-    && useradd --uid 1000 --gid appuser --shell /usr/sbin/nologin --create-home appuser \
+RUN addgroup -g 1000 appuser \
+    && adduser -D -u 1000 -G appuser -h /home/appuser appuser \
     && mkdir -p /data \
     && chown -R appuser:appuser /dist /data
 
